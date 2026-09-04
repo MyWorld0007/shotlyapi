@@ -57,6 +57,9 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <div className="auth-switch" style={{ marginBottom: '8px' }}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </div>
         <div className="auth-switch">
           Don't have an account? <Link to="/signup">Sign up free</Link>
         </div>

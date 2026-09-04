@@ -1,5 +1,5 @@
-// ShotlyAPI Worker — v2.0 with 12 new screenshot parameters + email + password reset
-// Deploy this to your Cloudflare Worker (screenshot-api)
+// ShotlyAPI Worker — v3.0 with 21 features (12 original + 5 new: ads, css, js, html, text, bulk)
+// Deploy to Cloudflare Worker (screenshot-api)
 
 const PLANS = {
   free: { name: 'Free', price: 0, limit: 50 },
@@ -15,10 +15,7 @@ const corsHeaders = {
 }
 
 function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-  })
+  return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders } })
 }
 
 function jsonError(status, message) {
@@ -117,23 +114,21 @@ function getScreenshotParams(url) {
     cookies: p.get('cookies') || null,
     hide_elements: p.get('hide_elements') || null,
     fresh: p.get('fresh') || null,
+    block_ads: p.get('block_ads') || p.get('block_banners') || null,
+    css: p.get('css') || null,
+    js: p.get('js') || null,
+    custom_html: p.get('custom_html') || null,
+    extract_text: p.get('extract_text') || null,
   }
 }
 
 function buildCacheKey(params) {
   const keyStr = JSON.stringify({
-    url: params.url,
-    format: params.format,
-    width: params.width,
-    height: params.height,
-    full_page: params.full_page,
-    delay: params.delay,
-    wait_for_selector: params.wait_for_selector,
-    wait_for_event: params.wait_for_event,
-    selector: params.selector,
-    user_agent: params.user_agent,
-    cookies: params.cookies,
-    hide_elements: params.hide_elements,
+    url: params.url, format: params.format, width: params.width, height: params.height,
+    full_page: params.full_page, delay: params.delay, wait_for_selector: params.wait_for_selector,
+    wait_for_event: params.wait_for_event, selector: params.selector, user_agent: params.user_agent,
+    cookies: params.cookies, hide_elements: params.hide_elements, block_ads: params.block_ads,
+    css: params.css, js: params.js, custom_html: params.custom_html, extract_text: params.extract_text,
   })
   let hash = 0
   for (let i = 0; i < keyStr.length; i++) {
@@ -147,7 +142,7 @@ function buildCacheKey(params) {
 function buildOracleUrl(env, params) {
   const baseUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot'
   const q = new URLSearchParams()
-  q.set('url', params.url)
+  if (params.url) q.set('url', params.url)
   if (params.format && params.format !== 'png') q.set('format', params.format)
   if (params.width) q.set('width', params.width)
   if (params.height) q.set('height', params.height)
@@ -159,6 +154,11 @@ function buildOracleUrl(env, params) {
   if (params.user_agent) q.set('user_agent', params.user_agent)
   if (params.cookies) q.set('cookies', params.cookies)
   if (params.hide_elements) q.set('hide_elements', params.hide_elements)
+  if (params.block_ads) q.set('block_ads', params.block_ads)
+  if (params.css) q.set('css', params.css)
+  if (params.js) q.set('js', params.js)
+  if (params.custom_html) q.set('custom_html', params.custom_html)
+  if (params.extract_text) q.set('extract_text', params.extract_text)
   return baseUrl + '?' + q.toString()
 }
 
@@ -179,9 +179,10 @@ export default {
     if (path === '/' || path === '/api') {
       return jsonResponse({
         name: 'ShotlyAPI',
-        version: '2.0',
+        version: '3.0',
         endpoints: {
-          screenshot: '/api/screenshot?url=...&api_key=...&format=png&width=1440&height=900&full_page=true&delay=2000&wait_for_selector=.hero&wait_for_event=networkidle&selector=.pricing&user_agent=...&cookies=...&hide_elements=.ad-banner&fresh=true',
+          screenshot: '/api/screenshot?url=...&api_key=...&format=png&full_page=true&width=1440&height=900&block_ads=true&css=...&js=...&custom_html=...&extract_text=true',
+          bulk: 'POST /api/screenshot/bulk',
           pdf: '/api/screenshot?url=...&api_key=...&format=pdf',
           health: '/health',
           auth: '/api/auth/signup, /api/auth/login, /api/auth/forgot-password, /api/auth/reset-password',
@@ -200,6 +201,11 @@ export default {
           user_agent: 'custom User-Agent string',
           cookies: 'JSON array of cookie objects',
           hide_elements: 'CSS selectors to hide (comma-separated)',
+          block_ads: 'true - block ads, cookie banners, chat widgets',
+          css: 'custom CSS to inject into the page',
+          js: 'custom JavaScript to execute on the page',
+          custom_html: 'raw HTML to render instead of navigating to a URL',
+          extract_text: 'true - return page text content instead of image',
           fresh: 'true - bypass cache and force fresh capture',
         },
         docs: 'https://shotlyapi.in/docs',
@@ -388,11 +394,47 @@ export default {
       }
     }
 
-    // ===== SCREENSHOT (v2.0 with 12 new params) =====
+    // ===== BULK SCREENSHOT =====
+    if (path === '/api/screenshot/bulk' && request.method === 'POST') {
+      const auth = request.headers.get('Authorization')
+      if (!auth || !auth.startsWith('Bearer ')) return jsonError(401, 'Not authenticated')
+      const token = auth.replace('Bearer ', '')
+      const jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      const decoded = await verifyJWT(token, jwtSecret)
+      if (!decoded) return jsonError(401, 'Invalid token')
+
+      const body = await request.json()
+      const apiKey = body.api_key
+      if (!apiKey) return jsonError(400, 'Missing api_key')
+
+      const user = await getUserByApiKey(env, apiKey)
+      if (!user) return jsonError(401, 'Invalid API key')
+
+      // Forward to Oracle server
+      const oracleUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot/bulk'
+      const response = await fetch(oracleUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(120000),
+      })
+
+      // Log usage for each URL
+      if (body.urls && Array.isArray(body.urls)) {
+        for (const u of body.urls) {
+          await logUsage(env, apiKey, u)
+        }
+      }
+
+      const data = await response.json()
+      return jsonResponse(data)
+    }
+
+    // ===== SCREENSHOT v3.0 =====
     if (path === '/api/screenshot' && request.method === 'GET') {
       const params = getScreenshotParams(url)
 
-      if (!params.url) return jsonError(400, 'Missing required parameter: url')
+      if (!params.url && !params.custom_html) return jsonError(400, 'Missing required parameter: url or custom_html')
       if (!params.api_key) return jsonError(401, 'Missing required parameter: api_key')
 
       const user = await getUserByApiKey(env, params.api_key)
@@ -404,13 +446,27 @@ export default {
         return jsonError(403, 'Usage limit exceeded (' + used + '/' + limit + '). Upgrade at https://shotlyapi.in/billing')
       }
 
+      // Text extraction doesn't need caching
+      if (params.extract_text === 'true') {
+        const oracleUrl = buildOracleUrl(env, params)
+        try {
+          const response = await fetch(oracleUrl, { signal: AbortSignal.timeout(45000) })
+          if (!response.ok) return jsonError(500, 'Text extraction failed.')
+          const data = await response.json()
+          await logUsage(env, params.api_key, params.url || 'custom_html')
+          return jsonResponse(data)
+        } catch (err) {
+          return jsonError(500, 'Could not reach screenshot server.')
+        }
+      }
+
       const cacheKey = buildCacheKey(params)
 
       // Check cache (unless fresh=true)
       if (env.SCREENSHOTS && params.fresh !== 'true') {
         const cached = await env.SCREENSHOTS.get(cacheKey)
         if (cached) {
-          await logUsage(env, params.api_key, params.url)
+          await logUsage(env, params.api_key, params.url || 'custom_html')
           const contentType = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
           return new Response(cached, {
             headers: { 'Content-Type': contentType, 'X-Cache': 'HIT', ...corsHeaders },
@@ -431,11 +487,11 @@ export default {
 
         if (env.SCREENSHOTS) {
           await env.SCREENSHOTS.put(cacheKey, imageBuffer, {
-            customMetadata: { url: params.url, created: new Date().toISOString() },
+            customMetadata: { url: params.url || 'custom_html', created: new Date().toISOString() },
           })
         }
 
-        await logUsage(env, params.api_key, params.url)
+        await logUsage(env, params.api_key, params.url || 'custom_html')
 
         const contentType = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
         return new Response(imageBuffer, {

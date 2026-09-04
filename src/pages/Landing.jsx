@@ -9,25 +9,47 @@ const features = [
   { icon: 'green', title: 'Simple API', desc: 'A single GET request is all it takes. No SDKs to install, no complex authentication flows.' },
   { icon: 'amber', title: 'Usage Analytics', desc: 'Track your screenshot usage, monitor trends, and optimize your quota with a detailed dashboard.' },
   { icon: 'purple', title: 'Full Page Capture', desc: 'Capture the entire scrollable page, not just the visible viewport, with perfect fidelity.' },
-  { icon: 'cyan', title: 'PDF Export', desc: 'Convert any web page into a pixel-perfect PDF document with a single API call.' },
+  { icon: 'cyan', title: 'PDF & Image Export', desc: 'Convert any web page into PNG, JPEG, WEBP, or PDF with a single format parameter.' },
+  { icon: 'rose', title: 'Ad & Banner Blocking', desc: 'Automatically strip cookie banners, GDPR popups, chat widgets, and ads before capture.' },
+  { icon: 'blue', title: 'CSS & JS Injection', desc: 'Inject custom CSS styles or execute JavaScript on the page before taking the screenshot.' },
+  { icon: 'green', title: 'HTML to Image', desc: 'Render raw HTML markup into a screenshot without needing a public URL. Perfect for OG images.' },
+  { icon: 'amber', title: 'Text Extraction', desc: 'Extract page titles, headings, and body text alongside screenshots in a single API call.' },
+  { icon: 'purple', title: 'Bulk Screenshots', desc: 'Process up to 50 URLs in a single POST request. Perfect for SEO audits and competitive analysis.' },
+  { icon: 'cyan', title: 'Smart Caching', desc: 'R2 edge caching delivers repeat screenshots in under 500ms. Use fresh=true to bypass cache.' },
   { icon: 'rose', title: 'Secure & Reliable', desc: 'Enterprise-grade security with API key authentication and 99.9% guaranteed uptime.' },
 ]
 
 const featureList = [
-  'Full Page', 'Custom Viewport', 'Element Screenshot', 'Remove Elements',
-  'Custom User Agent', 'Custom Headers', 'Wait for Selector', 'Wait for Network Idle',
-  'Custom Cookies', 'Custom Proxy', 'PDF Export', 'JPEG Format',
+  'Full Page Capture', 'Custom Viewport', 'Element Screenshot', 'Remove Elements',
+  'Custom User Agent', 'Custom Cookies', 'Wait for Selector', 'Wait for Network Idle',
+  'PDF Export', 'JPEG Format', 'WEBP Format', 'PNG Format',
+  'Ad & Banner Blocking', 'CSS Injection', 'JS Injection', 'HTML to Image',
+  'Text Extraction', 'Bulk Screenshots', 'R2 Edge Caching', 'Fresh Capture Bypass',
+  'Custom Delay',
 ]
 
 const comparisonRows = [
-  { feature: 'PDF Export', shotly: true, puppeteer: true, playwright: true },
   { feature: 'PNG Output', shotly: true, puppeteer: true, playwright: true },
   { feature: 'JPEG Format', shotly: true, puppeteer: false, playwright: false },
   { feature: 'WEBP Format', shotly: true, puppeteer: false, playwright: false },
-  { feature: 'Full Page', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'PDF Export', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Full Page Capture', shotly: true, puppeteer: true, playwright: true },
   { feature: 'Custom Viewport', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Element Screenshot', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Wait for Selector', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Wait for Network Idle', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Custom User Agent', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Custom Cookies', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Hide Elements', shotly: true, puppeteer: true, playwright: true },
+  { feature: 'Ad & Banner Blocking', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'CSS Injection', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'JS Injection', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'HTML to Image', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'Text Extraction', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'Bulk Screenshots', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'R2 Edge Caching', shotly: true, puppeteer: false, playwright: false },
+  { feature: 'Fresh Capture Bypass', shotly: true, puppeteer: false, playwright: false },
   { feature: 'No Infrastructure', shotly: true, puppeteer: false, playwright: false },
-  { feature: 'R2 Caching', shotly: true, puppeteer: false, playwright: false },
   { feature: 'API Key Auth', shotly: true, puppeteer: false, playwright: false },
   { feature: 'Usage Analytics', shotly: true, puppeteer: false, playwright: false },
 ]
@@ -40,9 +62,9 @@ const testimonials = [
 
 const pricingTiers = [
   { name: 'Free', amount: 'Rs 0', inr: '', period: '', desc: '50 screenshots / month', features: ['50 screenshots / month', 'PNG & JPEG formats', 'Full page capture', 'Community support'], cta: 'Start Free', popular: false },
-  { name: 'Starter', amount: '$5', inr: 'approx Rs 399', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats', 'PDF export', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
-  { name: 'Growth', amount: '$9', inr: 'approx Rs 699', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'R2 caching', 'Custom headers', 'Priority support'], cta: 'Get Growth', popular: true },
-  { name: 'Pro', amount: '$19', inr: 'approx Rs 1,499', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Custom proxy', 'Usage analytics', 'Dedicated support'], cta: 'Get Pro', popular: false },
+  { name: 'Starter', amount: '$5', inr: 'approx Rs 399', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
+  { name: 'Growth', amount: '$9', inr: 'approx Rs 699', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
+  { name: 'Pro', amount: '$19', inr: 'approx Rs 1,499', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
 ]
 
 const faqs = [
@@ -50,13 +72,18 @@ const faqs = [
   { q: 'How does ShotlyAPI work?', a: 'You send a GET request to our API endpoint with the target URL and your API key. Our rendering engine loads the page in a real Chromium browser, captures the screenshot, and returns the image within seconds. Repeat requests are served instantly from R2 cache.' },
   { q: 'Is there a free tier?', a: 'Yes. Our free tier includes 50 screenshots per month at no cost, with no credit card required. It is perfect for testing, personal projects, and small-scale usage. You can upgrade to a paid plan anytime for higher limits.' },
   { q: 'What image formats are supported?', a: 'ShotlyAPI supports PNG, JPEG, and WEBP image formats, plus PDF document export. You can specify the desired format via the format query parameter in your API request.' },
+  { q: 'Can you block cookie banners and ads?', a: 'Yes! Use block_ads=true to automatically strip cookie banners, GDPR consent popups, chat widgets, and ads before the screenshot is taken. No manual CSS workarounds needed.' },
+  { q: 'Can I inject custom CSS or JavaScript?', a: 'Yes. Use the css parameter to inject custom styles, or the js parameter to execute JavaScript on the page before capture. This is perfect for dismissing modals, filling forms, or testing design variations.' },
+  { q: 'Can I render HTML to an image?', a: 'Yes! Use the custom_html parameter to send raw HTML markup and get back a rendered screenshot. Perfect for generating OG images, email previews, invoices, and dynamic social cards.' },
   { q: 'How fast is the API?', a: 'Our average response time is under 3 seconds for fresh captures. Cached screenshots return in under 500ms. Our global edge network ensures low latency regardless of your geographic location.' },
-  { q: 'Can I use screenshots commercially?', a: 'Absolutely. ShotlyAPI is designed for commercial use. All paid plans include a commercial license, and we offer dedicated support for enterprise customers with high-volume requirements.' },
 ]
 
 const curlExample = `curl -G 'https://api.shotlyapi.in/api/screenshot' \\
   --data-urlencode 'url=https://example.com' \\
   --data-urlencode 'api_key=YOUR_API_KEY' \\
+  --data-urlencode 'format=png' \\
+  --data-urlencode 'full_page=true' \\
+  --data-urlencode 'block_ads=true' \\
   -o screenshot.png`
 
 const pythonExample = `import requests
@@ -65,6 +92,11 @@ API_URL = 'https://api.shotlyapi.in/api/screenshot'
 params = {
     'url': 'https://example.com',
     'api_key': 'YOUR_API_KEY',
+    'format': 'png',
+    'full_page': 'true',
+    'block_ads': 'true',
+    'width': 1440,
+    'height': 900,
 }
 response = requests.get(API_URL, params=params)
 
@@ -100,7 +132,7 @@ export default function Landing() {
     setScreenshotSrc(null)
     try {
       const res = await fetch(
-        `${API_URL}/api/screenshot?url=${encodeURIComponent(demoUrl)}&api_key=test-key-123`
+        `${API_URL}/api/screenshot?url=${encodeURIComponent(demoUrl)}&api_key=test-key-123&block_ads=true`
       )
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -148,7 +180,7 @@ export default function Landing() {
       <section className="hero">
         <div className="container">
           <div className="hero-badge">
-            <span className="dot" /> Now with R2 caching — 3x faster
+            <span className="dot" /> 21+ features — now with ad blocking, CSS/JS injection & bulk API
           </div>
           <h1>
             Website Screenshot API<br />
@@ -175,6 +207,7 @@ export default function Landing() {
               <span className="cmd">curl</span> <span className="str">'https://api.shotlyapi.in/api/screenshot'</span>{' \\\n  '}
               <span className="flag">--data-urlencode</span> <span className="str">'url=https://example.com'</span>{' \\\n  '}
               <span className="flag">--data-urlencode</span> <span className="key">api_key=YOUR_KEY</span>{' \\\n  '}
+              <span className="flag">--data-urlencode</span> <span className="key">block_ads=true</span>{' \\\n  '}
               <span className="flag">-o</span> screenshot.png
             </div>
           </div>
@@ -239,7 +272,7 @@ export default function Landing() {
                 <div className="stat-label">Avg Response</div>
               </div>
               <div>
-                <div className="stat-num">50+</div>
+                <div className="stat-num">21+</div>
                 <div className="stat-label">Features</div>
               </div>
               <div>
@@ -255,7 +288,7 @@ export default function Landing() {
       <section className="features" id="features">
         <div className="container">
           <h2 className="section-title">Everything you need to capture the web</h2>
-          <p className="section-sub">From the simplest use cases to the most complex requirements.</p>
+          <p className="section-sub">21+ features for developers, by developers.</p>
           <div className="feature-grid">
             {features.map((f) => (
               <div className="feature-card" key={f.title}>
@@ -293,12 +326,14 @@ export default function Landing() {
               <p>Simple REST API. No SDKs required. Works with any language.</p>
               <ul>
                 <li><Check /> Single GET request</li>
-                <li><Check /> No SDK required</li>
-                <li><Check /> Instant authentication</li>
-                <li><Check /> Custom viewport size</li>
-                <li><Check /> Full page capture</li>
-                <li><Check /> PDF & image export</li>
-                <li><Check /> Built-in R2 caching</li>
+                <li><Check /> 21+ rendering parameters</li>
+                <li><Check /> PNG, JPEG, WEBP, PDF</li>
+                <li><Check /> Ad & banner blocking</li>
+                <li><Check /> CSS & JS injection</li>
+                <li><Check /> HTML to Image</li>
+                <li><Check /> Text extraction</li>
+                <li><Check /> Bulk screenshots API</li>
+                <li><Check /> R2 edge caching</li>
               </ul>
             </div>
             <div>

@@ -106,7 +106,7 @@ export default function Billing() {
       <nav>
         <div className="container nav-inner">
           <Link to="/" className="logo">
-            <span className="logo-mark">S</span>
+            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
             ShotlyAPI
           </Link>
           <div className="nav-links">

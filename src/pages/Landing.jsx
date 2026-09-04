@@ -92,7 +92,7 @@ export default function Landing() {
         <div className="container">
           <div className="stats-grid">
             <div><div className="stat-num">99.9%</div><div className="stat-label">Uptime</div></div>
-            <div><div className="stat-num"><3s</div><div className="stat-label">Avg Response</div></div>
+            <div><div className="stat-num">{'<3s'}</div><div className="stat-label">Avg Response</div></div>
             <div><div className="stat-num">1920x1080</div><div className="stat-label">Full HD</div></div>
             <div><div className="stat-num">Rs 0</div><div className="stat-label">Free Tier</div></div>
           </div>

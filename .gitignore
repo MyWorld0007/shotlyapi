@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+dist/
+.env
+.env.local
+*.log
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Cloudflare
+.wrangler/

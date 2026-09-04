@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
+const API_URL = 'https://api.shotlyapi.in'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
@@ -9,7 +10,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('shotly_token')
     if (token) {
-      fetch('/api/auth/me', {
+      fetch(`${API_URL}/api/auth/me`, {
         headers: { 'Authorization': 'Bearer ' + token }
       })
         .then(r => r.ok ? r.json() : null)
@@ -29,7 +30,7 @@ export function AuthProvider({ children }) {
 
   function login(token) {
     localStorage.setItem('shotly_token', token)
-    return fetch('/api/auth/me', {
+    return fetch(`${API_URL}/api/auth/me`, {
       headers: { 'Authorization': 'Bearer ' + token }
     })
       .then(r => r.json())

@@ -9,6 +9,9 @@ import Dashboard from './pages/Dashboard'
 import Billing from './pages/Billing'
 import Docs from './pages/Docs'
 import { AuthProvider } from './lib/auth'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
@@ -22,6 +25,8 @@ root.render(
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/docs" element={<Docs />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

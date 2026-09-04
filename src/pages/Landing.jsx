@@ -196,7 +196,7 @@ export default function Landing() {
       <section className="demo-section" id="demo">
         <div className="container">
           <h2 className="section-title">Try it live</h2>
-            <p>Enter any URL and capture a screenshot in seconds. No signup required.</p>
+          <p className="section-sub">Enter any URL and capture a screenshot in seconds. No signup required.</p>
           <div className="demo-card">
             <div className="demo-input-row">
               <input

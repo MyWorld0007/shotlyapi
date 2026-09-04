@@ -38,7 +38,7 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '24px' }}>
-          <span className="logo-mark">S</span>
+          <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
           ShotlyAPI
         </Link>
         <h2>Welcome back</h2>

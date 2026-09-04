@@ -1,4 +1,4 @@
-// ShotlyAPI Oracle Server — v2.0 with 12 new screenshot parameters
+// ShotlyAPI Oracle Server — v2.1 with system Chromium (ARM64 compatible)
 // Run with: pm2 start server.js --name screenshot-api
 // Deploy to: ~/screenshot-api/server.js on Oracle Cloud
 
@@ -7,6 +7,9 @@ const puppeteer = require('puppeteer')
 const app = express()
 
 const PORT = process.env.PORT || 3000
+
+// Use system-installed Chromium (works on ARM64)
+const CHROMIUM_PATH = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
 
 // Keep a browser instance alive for faster renders
 let browserInstance = null
@@ -23,6 +26,7 @@ async function getBrowser() {
 
   browserInstance = await puppeteer.launch({
     headless: 'new',
+    executablePath: CHROMIUM_PATH,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -100,8 +104,8 @@ app.get('/api/screenshot', async (req, res) => {
 
     // Hide elements
     if (hideElements) {
-      const selectors = hideElements.split(',').map(s => s.trim())
-      for (const sel of selectors) {
+      const selectorsArr = hideElements.split(',').map(s => s.trim())
+      for (const sel of selectorsArr) {
         try {
           await page.evaluate((sel) => {
             const el = document.querySelector(sel)
@@ -167,6 +171,7 @@ app.get('/api/screenshot', async (req, res) => {
 })
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('ShotlyAPI screenshot server v2.0 running on port ' + PORT)
+  console.log('ShotlyAPI screenshot server v2.1 running on port ' + PORT)
+  console.log('Using Chromium at: ' + CHROMIUM_PATH)
   console.log('Features: PNG, JPEG, PDF, full_page, custom viewport, delay, wait_for_selector, wait_for_event, element selector, user_agent, cookies, hide_elements')
 })

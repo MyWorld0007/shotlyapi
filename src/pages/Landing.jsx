@@ -117,8 +117,6 @@ export default function Landing() {
 
   return (
     <div>
-      <div className="bg-glow" />
-
       {/* Nav */}
       <nav>
         <div className="nav-inner container">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ used: 0, limit: 50, plan: 'free' })
   const [recent, setRecent] = useState([])
   const [copied, setCopied] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     if (!loading && !user) navigate('/login')
@@ -67,6 +69,7 @@ export default function Dashboard() {
             <Link to="/docs">Docs</Link>
             <button onClick={() => { logout(); navigate('/') }} className="btn btn-outline btn-sm">Sign Out</button>
           </div>
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </nav>
 

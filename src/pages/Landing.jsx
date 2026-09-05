@@ -62,7 +62,7 @@ const testimonials = [
 ]
 
 const pricingTiers = [
-  { name: 'Free', amount: '$0', period: '', desc: '50 screenshots / month', features: ['50 screenshots / month', 'PNG & JPEG formats', 'Full page capture', 'Community support'], cta: 'Start Free', popular: false },
+  { name: 'Trial', amount: '$1', period: '/one-time', desc: '100 screenshots / 7 days', features: ['100 screenshots for 7 days', 'PNG & JPEG formats', 'Mobile, Tablet & Desktop viewport', 'Full page capture', 'Community support'], cta: 'Start Trial', popular: false },
   { name: 'Starter', amount: '$5', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
   { name: 'Growth', amount: '$9', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
   { name: 'Pro', amount: '$19', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
@@ -71,11 +71,11 @@ const pricingTiers = [
 const faqs = [
   { q: 'What is a screenshot API?', a: 'A screenshot API is a service that programmatically captures visual snapshots of web pages. Instead of running a headless browser yourself, you send a simple HTTP request and receive a high-quality image or PDF of the target website in return.' },
   { q: 'How does ShotlyAPI work?', a: 'You send a GET request to our API endpoint with the target URL and your API key. Our rendering engine loads the page in a real Chromium browser, captures the screenshot, and returns the image within seconds. Repeat requests are served instantly from R2 cache.' },
-  { q: 'Is there a free tier?', a: 'Yes. Our free tier includes 50 screenshots per month at no cost, with no credit card required. It is perfect for testing, personal projects, and small-scale usage. You can upgrade to a paid plan anytime for higher limits.' },
-  { q: 'What image formats are supported?', a: 'ShotlyAPI supports PNG, JPEG, and WEBP image formats, plus PDF document export. You can specify the desired format via the format query parameter in your API request.' },
-  { q: 'Can you block cookie banners and ads?', a: 'Yes! Use block_ads=true to automatically strip cookie banners, GDPR consent popups, chat widgets, and ads before the screenshot is taken. No manual CSS workarounds needed.' },
-  { q: 'Can I inject custom CSS or JavaScript?', a: 'Yes. Use the css parameter to inject custom styles, or the js parameter to execute JavaScript on the page before capture. This is perfect for dismissing modals, filling forms, or testing design variations.' },
-  { q: 'Can I render HTML to an image?', a: 'Yes! Use the custom_html parameter to send raw HTML markup and get back a rendered screenshot. Perfect for generating OG images, email previews, invoices, and dynamic social cards.' },
+  { q: 'What is the Trial plan?', a: 'The Trial plan is a one-time $1 payment that gives you 100 screenshots for 7 days. It includes PNG and JPEG formats, Mobile/Tablet/Desktop viewports, and full page capture. After 7 days, you can upgrade to a paid plan to continue using the API.' },
+  { q: 'What happens after my Trial expires?', a: 'After 7 days, your account will no longer be able to take screenshots. You can upgrade to any paid plan (Starter, Growth, or Pro) at any time to continue using the API with higher limits and more features.' },
+  { q: 'What image formats are supported?', a: 'ShotlyAPI supports PNG, JPEG, and WEBP image formats, plus PDF document export. The Trial plan includes PNG and JPEG. WEBP and PDF are available on paid plans.' },
+  { q: 'Can you block cookie banners and ads?', a: 'Yes! Use block_ads=true to automatically strip cookie banners, GDPR consent popups, chat widgets, and ads before the screenshot is taken. This feature is available on the Growth plan and above.' },
+  { q: 'Can I inject custom CSS or JavaScript?', a: 'Yes. Use the css parameter to inject custom styles, or the js parameter to execute JavaScript on the page before capture. This is available on the Starter plan and above.' },
   { q: 'How fast is the API?', a: 'Our average response time is under 3 seconds for fresh captures. Cached screenshots return in under 500ms. Our global edge network ensures low latency regardless of your geographic location.' },
 ]
 
@@ -194,7 +194,7 @@ export default function Landing() {
             screenshot or PDF with a single API call. Built on Cloudflare's edge network.
           </p>
           <div className="hero-cta">
-            <Link to="/signup" className="btn btn-primary btn-lg">Get Started Free</Link>
+            <Link to="/signup" className="btn btn-primary btn-lg">Get Started for $1</Link>
             <Link to="/playground" className="btn btn-outline btn-lg">Try Capture Studio</Link>
           </div>
 
@@ -279,8 +279,8 @@ export default function Landing() {
                 <div className="stat-label">Features</div>
               </div>
               <div>
-                <div className="stat-num">$0</div>
-                <div className="stat-label">Free Tier</div>
+                <div className="stat-num">$1</div>
+                <div className="stat-label">Trial Plan</div>
               </div>
             </div>
           </div>
@@ -417,7 +417,7 @@ export default function Landing() {
       {/* Pricing */}
       <section className="pricing" id="pricing">
         <h2 className="section-title">Simple, transparent pricing</h2>
-        <p className="section-sub">Start free. Upgrade when you need more power.</p>
+        <p className="section-sub">Start with a $1 trial. Upgrade when you need more power.</p>
         <div className="pricing-grid">
           {pricingTiers.map((tier) => (
             <div className={`price-card ${tier.popular ? 'popular' : ''}`} key={tier.name}>
@@ -461,7 +461,7 @@ export default function Landing() {
           <div className="cta-inner">
             <h2>Ready to capture those screenshots?</h2>
             <p>Join thousands of developers building with ShotlyAPI.</p>
-            <Link to="/signup" className="btn btn-glow btn-lg">Get Started Free</Link>
+            <Link to="/signup" className="btn btn-glow btn-lg">Get Started for $1</Link>
           </div>
         </div>
       </section>

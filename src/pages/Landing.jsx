@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -119,6 +120,7 @@ function FAQItem({ item, isOpen, onClick }) {
 
 export default function Landing() {
   const { user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [demoUrl, setDemoUrl] = useState('https://example.com')
   const [screenshotSrc, setScreenshotSrc] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -158,12 +160,13 @@ export default function Landing() {
           </Link>
           <div className="nav-links">
             <a href="#features">Features</a>
-            <Link to="/playground" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Playground</Link>
+            <Link to="/playground" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Capture Studio</Link>
             <a href="#docs">Docs</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
           </div>
           <div className="nav-actions">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
             {user ? (
               <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link>
             ) : (
@@ -192,7 +195,7 @@ export default function Landing() {
           </p>
           <div className="hero-cta">
             <Link to="/signup" className="btn btn-primary btn-lg">Get Started Free</Link>
-            <Link to="/playground" className="btn btn-outline btn-lg">Try Playground</Link>
+            <Link to="/playground" className="btn btn-outline btn-lg">Try Capture Studio</Link>
           </div>
 
           {/* Terminal */}
@@ -477,7 +480,7 @@ export default function Landing() {
             <div className="footer-col">
               <h4>Product</h4>
               <a href="#features">Features</a>
-              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Playground</Link>
+              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Capture Studio</Link>
               <a href="#pricing">Pricing</a>
               <a href="#demo">Live Demo</a>
               <Link to="/faq" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>FAQ</Link>

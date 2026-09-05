@@ -5,13 +5,18 @@ import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 const API_URL = 'https://api.shotlyapi.in'
 
 const viewports = [
-  { label: 'Mobile', width: 390, height: 844, icon: '\u{1F4F1}' },
-  { label: 'Tablet', width: 768, height: 1024, icon: '\u{1F4F2}' },
-  { label: 'Desktop', width: 1440, height: 900, icon: '\u{1F4BB}' },
-  { label: '4K', width: 2560, height: 1600, icon: '\u{1F5A5}' },
+  { label: 'Mobile', width: 390, height: 844, icon: '\u{1F4F1}', paid: false },
+  { label: 'Tablet', width: 768, height: 1024, icon: '\u{1F4F2}', paid: false },
+  { label: 'Desktop', width: 1440, height: 900, icon: '\u{1F4BB}', paid: false },
+  { label: '4K', width: 2560, height: 1600, icon: '\u{1F5A5}', paid: true },
 ]
 
-const formats = ['PNG', 'JPG', 'WEBP', 'PDF']
+const formats = [
+  { label: 'PNG', paid: false },
+  { label: 'JPG', paid: false },
+  { label: 'WEBP', paid: false },
+  { label: 'PDF', paid: true },
+]
 
 const paramsTable = [
   { param: 'URL', values: 'Any website URL', desc: 'The target website address to capture. Must include https:// or http://', free: true },
@@ -192,12 +197,14 @@ export default function Playground() {
                   {viewports.map((vp) => (
                     <button
                       key={vp.label}
-                      className={`pg-seg-btn ${viewport.label === vp.label ? 'active' : ''}`}
-                      onClick={() => setViewport(vp)}
+                      className={`pg-seg-btn ${viewport.label === vp.label ? 'active' : ''} ${vp.paid ? 'pg-locked' : ''}`}
+                      onClick={() => !vp.paid && setViewport(vp)}
                       type="button"
+                      disabled={vp.paid}
+                      title={vp.paid ? 'Paid' : ''}
                     >
                       <span className="pg-seg-icon">{vp.icon}</span>
-                      <span className="pg-seg-text">{vp.label}</span>
+                      <span className="pg-seg-text">{vp.label}{vp.paid && ' \u{1F512}'}</span>
                       <span className="pg-seg-dim">{vp.width}x{vp.height}</span>
                     </button>
                   ))}
@@ -210,12 +217,14 @@ export default function Playground() {
                 <div className="pg-segmented pg-segmented-sm">
                   {formats.map((f) => (
                     <button
-                      key={f}
-                      className={`pg-seg-btn-sm ${format === f ? 'active' : ''}`}
-                      onClick={() => setFormat(f)}
+                      key={f.label}
+                      className={`pg-seg-btn-sm ${format === f.label ? 'active' : ''} ${f.paid ? 'pg-locked' : ''}`}
+                      onClick={() => !f.paid && setFormat(f.label)}
                       type="button"
+                      disabled={f.paid}
+                      title={f.paid ? 'Paid' : ''}
                     >
-                      {f}
+                      {f.label}{f.paid && ' \u{1F512}'}
                     </button>
                   ))}
                 </div>
@@ -233,11 +242,13 @@ export default function Playground() {
                     IMAGE
                   </button>
                   <button
-                    className={`pg-seg-btn-sm ${output === 'JSON' ? 'active' : ''}`}
-                    onClick={() => setOutput('JSON')}
+                    className="pg-seg-btn-sm pg-locked"
+                    onClick={() => {}}
                     type="button"
+                    disabled
+                    title="Paid"
                   >
-                    JSON
+                    {'JSON \u{1F512}'}
                   </button>
                 </div>
               </div>
@@ -377,11 +388,6 @@ export default function Playground() {
             <div className="pg-result-area" ref={resultRef}>
               <div className="pg-result-header">
                 <div className="pg-result-label">Result</div>
-                {screenshotSrc && (
-                  <a href={screenshotSrc} download={`screenshot.${format.toLowerCase()}`} className="pg-download-btn">
-                    {'\u2B07'} Download
-                  </a>
-                )}
               </div>
               <div className="pg-result-box">
                 {loading && (

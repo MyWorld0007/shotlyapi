@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -12,6 +13,7 @@ export default function ResetPassword() {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const navigate = useNavigate()
+  const { theme, toggleTheme } = useTheme()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -49,6 +51,7 @@ export default function ResetPassword() {
     return (
       <div className="auth-page">
         <div className="auth-card">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '24px' }}>
             <span className="logo-mark">S</span>
             ShotlyAPI
@@ -67,6 +70,7 @@ export default function ResetPassword() {
     return (
       <div className="auth-page">
         <div className="auth-card">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '24px' }}>
             <span className="logo-mark">S</span>
             ShotlyAPI
@@ -84,6 +88,7 @@ export default function ResetPassword() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
         <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '24px' }}>
           <span className="logo-mark">S</span>
           ShotlyAPI

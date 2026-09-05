@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const sections = [
   { id: 'introduction', label: 'Introduction' },
@@ -17,6 +18,7 @@ const sections = [
 
 export default function PrivacyPolicy() {
   const { user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   return (
     <div>
       <nav>
@@ -28,6 +30,7 @@ export default function PrivacyPolicy() {
             <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Pricing</Link>
           </div>
           <div className="nav-actions">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
             {user ? <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link> : (
               <>
                 <Link to="/login" className="btn btn-outline btn-sm">Login</Link>

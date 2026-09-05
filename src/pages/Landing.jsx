@@ -61,10 +61,10 @@ const testimonials = [
 ]
 
 const pricingTiers = [
-  { name: 'Free', amount: '$0', inr: '', period: '', desc: '50 screenshots / month', features: ['50 screenshots / month', 'PNG & JPEG formats', 'Full page capture', 'Community support'], cta: 'Start Free', popular: false },
-  { name: 'Starter', amount: '$5', inr: 'approx Rs 399', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
-  { name: 'Growth', amount: '$9', inr: 'approx Rs 699', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
-  { name: 'Pro', amount: '$19', inr: 'approx Rs 1,499', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
+  { name: 'Free', amount: '$0', period: '', desc: '50 screenshots / month', features: ['50 screenshots / month', 'PNG & JPEG formats', 'Full page capture', 'Community support'], cta: 'Start Free', popular: false },
+  { name: 'Starter', amount: '$5', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
+  { name: 'Growth', amount: '$9', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
+  { name: 'Pro', amount: '$19', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
 ]
 
 const faqs = [
@@ -424,7 +424,6 @@ export default function Landing() {
                 {tier.amount}
                 {tier.period && <span className="period">{tier.period}</span>}
               </div>
-              {tier.inr && <div className="price-inr">({tier.inr})</div>}
               <div className="price-desc">{tier.desc}</div>
               <ul className="price-features">
                 {tier.features.map((feat) => (

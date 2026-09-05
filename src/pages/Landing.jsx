@@ -158,10 +158,10 @@ export default function Landing() {
           </Link>
           <div className="nav-links">
             <a href="#features">Features</a>
+            <Link to="/playground" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Playground</Link>
             <a href="#docs">Docs</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
-            <Link to="/faq">FAQ Page</Link>
           </div>
           <div className="nav-actions">
             {user ? (
@@ -192,7 +192,7 @@ export default function Landing() {
           </p>
           <div className="hero-cta">
             <Link to="/signup" className="btn btn-primary btn-lg">Get Started Free</Link>
-            <a href="#docs" className="btn btn-outline btn-lg">View Documentation</a>
+            <Link to="/playground" className="btn btn-outline btn-lg">Try Playground</Link>
           </div>
 
           {/* Terminal */}
@@ -477,6 +477,7 @@ export default function Landing() {
             <div className="footer-col">
               <h4>Product</h4>
               <a href="#features">Features</a>
+              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Playground</Link>
               <a href="#pricing">Pricing</a>
               <a href="#demo">Live Demo</a>
               <Link to="/faq" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>FAQ</Link>

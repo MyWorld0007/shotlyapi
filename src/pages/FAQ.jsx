@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const faqs = [
   { q: 'What is a screenshot API?', a: 'A screenshot API is a service that programmatically captures visual snapshots of web pages. Instead of running a headless browser yourself, you send a simple HTTP request and receive a high-quality image or PDF of the target website in return.' },
@@ -18,6 +19,7 @@ const faqs = [
 export default function FAQ() {
   const { user } = useAuth()
   const [openIndex, setOpenIndex] = useState(0)
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <div>
@@ -30,6 +32,7 @@ export default function FAQ() {
             <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Pricing</Link>
           </div>
           <div className="nav-actions">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
             {user ? <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link> : (
               <>
                 <Link to="/login" className="btn btn-outline btn-sm">Login</Link>

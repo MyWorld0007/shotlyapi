@@ -1,21 +1,14 @@
-// ShotlyAPI Worker — v4.0
-// Changes from v3:
-// - Free tier replaced with Trial ($1, 7 days, 100 screenshots, one-time)
-// - Monthly plans use Razorpay Subscriptions (auto-recurring)
-// - Trial uses regular Razorpay Orders (one-time)
-// - Trial expiry check on screenshot endpoint
-// - Webhook endpoint for subscription recurring payments
-// - New D1 columns: trial_started_at, subscription_id, plan_expires_at
+// ShotlyAPI Worker — v4.0 (INR)
+// All payments in INR to enable UPI, cards, wallets
+// Trial: ₹99 one-time | Starter: ₹499/mo | Growth: ₹899/mo | Pro: ₹1799/mo
 
 const PLANS = {
-  trial:   { name: 'Trial',   price: 1,  limit: 100,   type: 'one_time', duration_days: 7 },
-  starter: { name: 'Starter', price: 5,  limit: 2000,  type: 'subscription' },
-  growth:  { name: 'Growth',  price: 9,  limit: 4000,  type: 'subscription' },
-  pro:     { name: 'Pro',     price: 19, limit: 10000, type: 'subscription' },
+  trial:   { name: 'Trial',   price: 99,  limit: 100,   type: 'one_time', duration_days: 7 },
+  starter: { name: 'Starter', price: 499, limit: 2000,  type: 'subscription' },
+  growth:  { name: 'Growth',  price: 899, limit: 4000,  type: 'subscription' },
+  pro:     { name: 'Pro',     price: 1799, limit: 10000, type: 'subscription' },
 }
 
-// Map plan key → Razorpay plan_id env variable name
-// You will set these in Cloudflare Worker settings after creating plans in Razorpay dashboard
 const RZP_PLAN_IDS = {
   starter: 'RZP_PLAN_STARTER',
   growth:  'RZP_PLAN_GROWTH',
@@ -85,7 +78,7 @@ async function sendEmail(env, to, subject, html) {
 }
 
 async function sendWelcomeEmail(env, email) {
-  const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Welcome to ShotlyAPI!</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;">Your account has been created. Purchase a $1 Trial plan to start capturing screenshots — 100 screenshots for 7 days.</p><div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;"><code style="font-size:14px;color:#2563eb;word-break:break-all;">curl "https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY" -o screenshot.png</code></div><a href="https://shotlyapi.in/billing" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Buy Trial Plan — $1</a><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
+  const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Welcome to ShotlyAPI!</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;"><code style="font-size:14px;color:#2563eb;word-break:break-all;">curl "https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY" -o screenshot.png</code></div><a href="https://shotlyapi.in/billing" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Buy Trial Plan</a><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
   return await sendEmail(env, email, 'Welcome to ShotlyAPI!', html)
 }
 
@@ -110,21 +103,18 @@ async function getUsageCount(env, apiKey) {
   return result?.count || 0
 }
 
-// ===== Trial expiry check =====
 function isTrialExpired(user) {
   if (user.plan !== 'trial') return false
-  if (!user.trial_started_at) return true // No trial start date = expired
+  if (!user.trial_started_at) return true
   const started = new Date(user.trial_started_at).getTime()
   const sevenDays = 7 * 24 * 60 * 60 * 1000
   return Date.now() > started + sevenDays
 }
 
-// ===== Razorpay auth helper =====
 function rzpAuthHeader(env) {
   return 'Basic ' + btoa(env.RZP_KEY_ID + ':' + env.RZP_KEY_SECRET)
 }
 
-// ===== Screenshot params =====
 function getScreenshotParams(url) {
   const p = url.searchParams
   return {
@@ -190,7 +180,6 @@ function buildOracleUrl(env, params) {
   return baseUrl + '?' + q.toString()
 }
 
-// ===== Main Handler =====
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
@@ -237,10 +226,10 @@ export default {
           fresh: 'true - bypass cache and force fresh capture',
         },
         plans: {
-          trial:   '$1 one-time, 100 screenshots, 7 days',
-          starter: '$5/month, 2000 screenshots',
-          growth:  '$9/month, 4000 screenshots',
-          pro:     '$19/month, 10000 screenshots',
+          trial:   '\u20B999 one-time, 100 screenshots, 7 days',
+          starter: '\u20B9499/month, 2000 screenshots',
+          growth:  '\u20B9899/month, 4000 screenshots',
+          pro:     '\u20B91799/month, 10000 screenshots',
         },
         docs: 'https://shotlyapi.in/docs',
       })
@@ -263,7 +252,6 @@ export default {
       const jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
       const token = await makeJWT({ uid: userId, email, iat: Date.now() }, jwtSecret)
 
-      // New users start with plan='none' — they must buy at least a Trial to use the API
       await env.DB.prepare(
         'INSERT INTO users (id, email, password_hash, salt, api_key, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
       ).bind(userId, email, hashedPw, salt, apiKey, 'none', new Date().toISOString()).run()
@@ -301,7 +289,6 @@ export default {
       const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
       if (!user) return jsonError(404, 'User not found')
 
-      // Include trial expiry info if applicable
       const trialExpired = isTrialExpired(user)
       return jsonResponse({
         id: user.id,
@@ -412,13 +399,13 @@ export default {
 
       // ===== TRIAL: One-time order (no subscription) =====
       if (plan.type === 'one_time') {
-        const amount = plan.price * 100 // $1 = 100 cents
+        const amount = plan.price * 100 // ₹99 = 9900 paise
         const rzpResponse = await fetch('https://api.razorpay.com/v1/orders', {
           method: 'POST',
           headers: { 'Authorization': rzpAuthHeader(env), 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount,
-            currency: 'USD',
+            currency: 'INR',
             receipt: 'shotly_trial_' + decoded.uid + '_' + Date.now(),
             notes: { plan: planKey, user_id: decoded.uid },
           }),
@@ -441,7 +428,6 @@ export default {
         return jsonError(500, 'Subscription plan not configured. Set ' + planIdEnvVar + ' in Worker env vars.')
       }
 
-      // Create subscription via Razorpay API
       const rzpResponse = await fetch('https://api.razorpay.com/v1/subscriptions', {
         method: 'POST',
         headers: { 'Authorization': rzpAuthHeader(env), 'Content-Type': 'application/json' },
@@ -449,7 +435,7 @@ export default {
           plan_id: razorpayPlanId,
           customer_notify: 1,
           quantity: 1,
-          total_count: 12, // 12 monthly billing cycles (1 year)
+          total_count: 12,
           notes: {
             plan: planKey,
             user_id: decoded.uid,
@@ -535,11 +521,10 @@ export default {
       }
     }
 
-    // ===== BILLING: WEBHOOK (for recurring subscription payments) =====
+    // ===== BILLING: WEBHOOK =====
     if (path === '/api/billing/webhook' && request.method === 'POST') {
       const body = await request.json()
 
-      // Verify webhook signature
       const webhookSignature = request.headers.get('X-Razorpay-Signature')
       const webhookSecret = env.RZP_WEBHOOK_SECRET
 
@@ -554,7 +539,6 @@ export default {
       const event = body.event
       const payment = body.payload?.payment?.entity
 
-      // subscription.charged = successful recurring payment
       if (event === 'subscription.charged' && payment) {
         const subscriptionId = body.payload?.subscription?.entity?.id
 
@@ -568,7 +552,6 @@ export default {
         }
       }
 
-      // subscription.cancelled = user cancelled their subscription
       if (event === 'subscription.cancelled') {
         const subscriptionId = body.payload?.subscription?.entity?.id
         if (subscriptionId) {
@@ -599,7 +582,6 @@ export default {
       const user = await getUserByApiKey(env, apiKey)
       if (!user) return jsonError(401, 'Invalid API key')
 
-      // Check plan status
       if (user.plan === 'none') return jsonError(403, 'No active plan. Purchase a plan at https://shotlyapi.in/billing')
       if (isTrialExpired(user)) return jsonError(403, 'Trial expired. Upgrade at https://shotlyapi.in/billing')
 
@@ -631,7 +613,6 @@ export default {
       const user = await getUserByApiKey(env, params.api_key)
       if (!user) return jsonError(401, 'Invalid API key. Get one at https://shotlyapi.in')
 
-      // ===== Plan checks =====
       if (user.plan === 'none') {
         return jsonError(403, 'No active plan. Purchase a plan at https://shotlyapi.in/billing')
       }
@@ -645,7 +626,6 @@ export default {
         return jsonError(403, 'Usage limit exceeded (' + used + '/' + limit + '). Upgrade at https://shotlyapi.in/billing')
       }
 
-      // Text extraction doesn't need caching
       if (params.extract_text === 'true') {
         const oracleUrl = buildOracleUrl(env, params)
         try {
@@ -661,7 +641,6 @@ export default {
 
       const cacheKey = buildCacheKey(params)
 
-      // Check cache (unless fresh=true)
       if (env.SCREENSHOTS && params.fresh !== 'true') {
         const cached = await env.SCREENSHOTS.get(cacheKey)
         if (cached) {

@@ -61,7 +61,7 @@ const testimonials = [
 ]
 
 const pricingTiers = [
-  { name: 'Free', amount: 'Rs 0', inr: '', period: '', desc: '50 screenshots / month', features: ['50 screenshots / month', 'PNG & JPEG formats', 'Full page capture', 'Community support'], cta: 'Start Free', popular: false },
+  { name: 'Free', amount: '$0', inr: '', period: '', desc: '50 screenshots / month', features: ['50 screenshots / month', 'PNG & JPEG formats', 'Full page capture', 'Community support'], cta: 'Start Free', popular: false },
   { name: 'Starter', amount: '$5', inr: 'approx Rs 399', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
   { name: 'Growth', amount: '$9', inr: 'approx Rs 699', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
   { name: 'Pro', amount: '$19', inr: 'approx Rs 1,499', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
@@ -276,7 +276,7 @@ export default function Landing() {
                 <div className="stat-label">Features</div>
               </div>
               <div>
-                <div className="stat-num">Rs 0</div>
+                <div className="stat-num">$0</div>
                 <div className="stat-label">Free Tier</div>
               </div>
             </div>

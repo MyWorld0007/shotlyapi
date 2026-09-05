@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -11,6 +12,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { theme, toggleTheme } = useTheme()
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -37,6 +39,7 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
         <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '24px' }}>
           <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
           ShotlyAPI

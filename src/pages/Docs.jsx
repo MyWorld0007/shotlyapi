@@ -1,9 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 export default function Docs() {
   const { user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <>
@@ -26,6 +28,7 @@ export default function Docs() {
               </>
             )}
           </div>
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </nav>
 

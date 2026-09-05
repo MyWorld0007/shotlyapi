@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -46,26 +47,8 @@ const steps = [
   { num: '4', title: 'You get the result back', desc: 'The response is returned as either the image/PDF file directly, or as JSON containing a hosted URL and metadata. Ready to store, display, or pass into another step of your pipeline.' },
 ]
 
-function ThemeToggle({ theme, onToggle }) {
-  return (
-    <button className="theme-toggle-btn" onClick={onToggle} type="button" aria-label="Toggle theme">
-      <div className="theme-toggle-track">
-        <div className={`theme-toggle-thumb ${theme}`}>
-          <span className="theme-toggle-icon">
-            {theme === 'dark' ? '\u{1F319}' : '\u2600\uFE0F'}
-          </span>
-        </div>
-        <div className="theme-toggle-labels">
-          <span className={`theme-label ${theme === 'light' ? 'active' : ''}`}>{'\u2600'}</span>
-          <span className={`theme-label ${theme === 'dark' ? 'active' : ''}`}>{'\u{1F319}'}</span>
-        </div>
-      </div>
-    </button>
-  )
-}
-
 export default function Playground() {
-  const [theme, setTheme] = useState('dark')
+  const { theme, toggleTheme } = useTheme()
   const [url, setUrl] = useState('https://example.com')
   const [viewport, setViewport] = useState(viewports[2])
   const [format, setFormat] = useState('PNG')
@@ -85,10 +68,6 @@ export default function Playground() {
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
   const resultRef = useRef(null)
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
 
   const buildParams = () => {
     const p = new URLSearchParams()
@@ -169,22 +148,22 @@ export default function Playground() {
           </Link>
           <div className="nav-links">
             <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Home</Link>
-            <a href="#playground" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Playground</a>
+            <a href="#studio" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Studio</a>
             <a href="#settings" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Settings</a>
             <a href="#format-guide" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Guide</a>
           </div>
           <div className="nav-actions">
-            <ThemeToggle theme={theme} onToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
             <Link to="/signup" className="btn btn-primary btn-sm">Get API Key</Link>
           </div>
         </div>
       </nav>
 
-      {/* Playground */}
-      <section className="pg-hero" id="playground">
+      {/* Capture Studio */}
+      <section className="pg-hero" id="studio">
         <div className="container">
           <h1 className="pg-title">
-            Screenshot <span className="gradient-text">Playground</span>
+            Capture <span className="gradient-text">Studio</span>
           </h1>
           <p className="pg-subtitle">
             Instantly capture full-page or custom screenshots of any website.
@@ -474,7 +453,7 @@ export default function Playground() {
       <section className="pg-settings" id="settings">
         <div className="container">
           <h2 className="section-title">What each setting does</h2>
-          <p className="section-sub">A quick reference for every option in the Playground above, so you know exactly which parameter to change in your own API calls.</p>
+          <p className="section-sub">A quick reference for every option in the Studio above, so you know exactly which parameter to change in your own API calls.</p>
           <div className="pg-table-wrap">
             <table className="pg-table">
               <thead>
@@ -594,7 +573,7 @@ export default function Playground() {
             <div className="footer-col">
               <h4>Product</h4>
               <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Home</Link>
-              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Playground</Link>
+              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Capture Studio</Link>
               <a href="#pricing" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Pricing</a>
             </div>
             <div className="footer-col">

@@ -6,6 +6,7 @@ const PLANS = {
   starter: { name: 'Starter', price: 499, limit: 2000,  type: 'subscription' },
   growth:  { name: 'Growth',  price: 899, limit: 4000,  type: 'subscription' },
   pro:     { name: 'Pro',     price: 1799, limit: 10000, type: 'subscription' },
+  demo:    { name: 'Demo',    price: 0,    limit: 200,    type: 'demo' },
 }
 
 const RZP_PLAN_IDS = {
@@ -22,7 +23,7 @@ const corsHeaders = {
 
 function jsonResponse(data, status) {
   if (!status) status = 200
-  return new Response(JSON.stringify(data), { status: status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
+  return new Response(JSON.stringify(data), { status: status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } })
 }
 
 function jsonError(status, message) {
@@ -308,8 +309,7 @@ export default {
       var used = await getUsageCount(env, user.api_key)
       var limit = (PLANS[user.plan] && PLANS[user.plan].limit) || 0
       var recent = await env.DB.prepare('SELECT url, timestamp FROM usage WHERE api_key = ? ORDER BY timestamp DESC LIMIT 10').bind(user.api_key).all()
-      var trialExpiresAt = user.plan === 'trial' && user.trial_started_at ? new Date(new Date(user.trial_started_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null
-      return jsonResponse({ stats: { used: used, limit: limit, plan: user.plan, trial_expired: isTrialExpired(user), trial_expires_at: trialExpiresAt }, recent: recent.results || [] })
+      return jsonResponse({ stats: { used: used, limit: limit, plan: user.plan, trial_expired: isTrialExpired(user) }, recent: recent.results || [] })
     }
 
     // BILLING: CREATE ORDER / SUBSCRIPTION

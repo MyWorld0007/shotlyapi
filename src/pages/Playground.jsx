@@ -49,14 +49,14 @@ const steps = [
   { num: '1', title: 'You send a request', desc: 'Call the API with a target URL and the parameters you want. Viewport, file type, output mode, and any advanced options like full page or ad blocking.' },
   { num: '2', title: 'A headless browser renders the page', desc: 'The target page is loaded in a real Chromium browser at the requested viewport size, so the capture reflects what a visitor would actually see, including JavaScript-rendered content.' },
   { num: '3', title: 'Optional cleanup is applied', desc: 'If enabled, cookie banners and ad placements are removed, custom CSS/JS is injected, and the page is prepared for capture so it reflects the actual content.' },
-  { num: '4', title: 'You get the result back', desc: 'The response is returned as either the image/PDF file directly, or as JSON containing a hosted URL and metadata. Ready to store, display, or pass into another step of your pipeline.' },
+  { num: '4', title: 'You get the result back', desc: 'The response is returned as either the image/PDF file directly, or as JSON containing a hosted URL and metadata. Ready to store, display, or pass into another stepof your pipeline.' },
 ]
 
 export default function Playground() {
   const { theme, toggleTheme } = useTheme()
   const [url, setUrl] = useState('https://example.com')
   const [viewport, setViewport] = useState(viewports[2])
-  const [format, setFormat] = useState('PNG')
+  const [format, setFormat] = useState('PNG?')
   const [fullPage, setFullPage] = useState(false)
   const [output, setOutput] = useState('IMAGE')
   const [blockAds, setBlockAds] = useState(false)
@@ -542,7 +542,7 @@ export default function Playground() {
               <div className="pg-step" key={step.num}>
                 <div className="pg-step-num">{step.num}</div>
                 <div className="pg-step-content">
-                  <k3>{step.title}</h3>
+                  <h3>{step.title}</h3>
                   <p>{step.desc}</p>
                 </div>
               </div>

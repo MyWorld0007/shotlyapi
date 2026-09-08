@@ -148,7 +148,7 @@ export default function Playground() {
       <nav>
         <div className="nav-inner container">
           <Link to="/" className="logo">
-            <span className="logo-mark">S</span>
+            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
             ShotlyAPI
           </Link>
           <div className="nav-links">
@@ -571,7 +571,7 @@ export default function Playground() {
           <div className="footer-grid">
             <div className="footer-col">
               <Link to="/" className="logo" style={{ marginBottom: '12px' }}>
-                <span className="logo-mark">S</span>
+                <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
                 ShotlyAPI
               </Link>
               <p>The fastest way to capture website screenshots and PDFs via API.</p>

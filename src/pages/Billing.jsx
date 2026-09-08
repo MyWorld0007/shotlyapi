@@ -19,7 +19,7 @@ const PLAN_FEATURES = {
 }
 
 function formatPrice(price) {
-  return '\u20B9' + price.toLocaleString('en-IN')
+  return '₹' + price.toLocaleString('en-IN')
 }
 
 export default function Billing() {
@@ -201,11 +201,11 @@ export default function Billing() {
                     <div className="plan-name">{PLANS[currentPlan]?.name || 'Unknown'} Plan</div>
                     <div className="plan-price">
                       {PLANS[currentPlan]?.type === 'one_time'
-                        ? formatPrice(PLANS[currentPlan]?.price) + ' one-time \u2014 ' + PLANS[currentPlan]?.limit + ' screenshots for ' + PLANS[currentPlan]?.duration
-                        : formatPrice(PLANS[currentPlan]?.price) + '/mo \u2014 ' + PLANS[currentPlan]?.limit + ' screenshots per month'
+                        ? formatPrice(PLANS[currentPlan]?.price) + ' one-time - ' + PLANS[currentPlan]?.limit + ' screenshots for ' + PLANS[currentPlan]?.duration
+                        : formatPrice(PLANS[currentPlan]?.price) + '/mo - ' + PLANS[currentPlan]?.limit + ' screenshots per month'
                       }
                       {usageData?.trial_expired && currentPlan === 'trial' && (
-                        <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>\u2014 EXPIRED</span>
+                        <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>- EXPIRED</span>
                       )}
                     </div>
                   </>
@@ -255,7 +255,7 @@ export default function Billing() {
                         {upgrading === key
                           ? 'Processing...'
                           : key === 'trial'
-                            ? 'Buy Trial \u2014 ' + formatPrice(99)
+                            ? 'Buy Trial - ' + formatPrice(99)
                             : 'Subscribe'
                         }
                       </button>
@@ -274,9 +274,9 @@ export default function Billing() {
                 lineHeight: 1.6
               }}>
                 <strong style={{ color: '#7c3aed' }}>How billing works:</strong><br/>
-                {'\u2022'} <strong>Trial ({formatPrice(99)})</strong> — One-time payment. 100 screenshots for 7 days. After 7 days, your account stops working until you buy a monthly plan.<br/>
-                {'\u2022'} <strong>Monthly plans</strong> — Auto-recurring subscription via Razorpay. Billed automatically every month. Cancel anytime from your Razorpay dashboard or by contacting support.<br/>
-                {'\u2022'} All payments are processed securely by Razorpay. We never store your card details. UPI, cards, and wallets supported.
+                {'•'} <strong>Trial ({formatPrice(99)})</strong> - One-time payment. 100 screenshots for 7 days. After 7 days, your account stops working until you buy a monthly plan.<br/>
+                {'•'} <strong>Monthly plans</strong> - Auto-recurring subscription via Razorpay. Billed automatically every month. Cancel anytime from your Razorpay dashboard or by contacting support.<br/>
+                {'•'} All payments are processed securely by Razorpay. We never store your card details. UPI, cards, and wallets supported.
               </div>
             </div>
           </div>

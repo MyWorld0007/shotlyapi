@@ -111,6 +111,27 @@ async function getUsageCount(env, apiKey) {
   return (result && result.count) || 0
 }
 
+
+// ===== Rate Limiting =====
+async function checkRateLimit(env, ip, endpoint) {
+  var result = await env.DB.prepare(
+    "SELECT COUNT(*) as count FROM login_attempts WHERE ip = ? AND endpoint = ? AND timestamp >= datetime('now', '-15 minutes')"
+  ).bind(ip, endpoint).first()
+  return (result && result.count) || 0
+}
+
+async function logAttempt(env, ip, endpoint) {
+  await env.DB.prepare("INSERT INTO login_attempts (ip, endpoint) VALUES (?, ?)").bind(ip, endpoint).run()
+}
+
+async function cleanupAttempts(env) {
+  await env.DB.prepare("DELETE FROM login_attempts WHERE timestamp < datetime('now', '-1 hour')").run()
+}
+
+function getClientIP(request) {
+  return request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown'
+}
+
 function isTrialExpired(user) {
   if (user.plan !== 'trial') return false
   if (!user.trial_started_at) return true
@@ -178,11 +199,15 @@ export default {
 
     // AUTH: SIGNUP
     if (path === '/api/auth/signup' && request.method === 'POST') {
+      var clientIP = getClientIP(request)
+      var signupAttempts = await checkRateLimit(env, clientIP, 'signup')
+      if (signupAttempts >= 5) return jsonError(429, 'Too many signup attempts. Please try again in 15 minutes.')
+      ctx.waitUntil(cleanupAttempts(env))
       var body = await request.json()
       if (!body.email || !body.password) return jsonError(400, 'Email and password required')
       if (body.password.length < 6) return jsonError(400, 'Password must be at least 6 characters')
       var existing = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(body.email).first()
-      if (existing) return jsonError(409, 'Email already registered')
+      if (existing) { ctx.waitUntil(logAttempt(env, clientIP, 'signup')); return jsonError(409, 'Email already registered') }
       var salt = generateId()
       var hashedPw = await hashPassword(body.password, salt)
       var apiKey = generateApiKey()
@@ -196,12 +221,16 @@ export default {
 
     // AUTH: LOGIN
     if (path === '/api/auth/login' && request.method === 'POST') {
+      var clientIP = getClientIP(request)
+      var attempts = await checkRateLimit(env, clientIP, 'login')
+      if (attempts >= 10) return jsonError(429, 'Too many login attempts. Please try again in 15 minutes.')
+      ctx.waitUntil(cleanupAttempts(env))
       var body = await request.json()
       if (!body.email || !body.password) return jsonError(400, 'Email and password required')
       var user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(body.email).first()
-      if (!user) return jsonError(401, 'Invalid email or password')
+      if (!user) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
       var hashedPw = await hashPassword(body.password, user.salt)
-      if (hashedPw !== user.password_hash) return jsonError(401, 'Invalid email or password')
+      if (hashedPw !== user.password_hash) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
       var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: user.id, email: user.email, iat: Date.now() }, jwtSecret)
       return jsonResponse({ token: token, api_key: user.api_key, email: user.email })
@@ -235,6 +264,9 @@ export default {
 
     // AUTH: FORGOT PASSWORD
     if (path === '/api/auth/forgot-password' && request.method === 'POST') {
+      var resetIP = getClientIP(request)
+      var resetAttempts = await checkRateLimit(env, resetIP, 'reset')
+      if (resetAttempts >= 5) return jsonError(429, 'Too many reset attempts. Please try again in 15 minutes.')
       var body = await request.json()
       if (!body.email) return jsonError(400, 'Email required')
       var user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(body.email).first()
@@ -476,3 +508,4 @@ export default {
     return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
   },
 }
+

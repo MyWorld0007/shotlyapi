@@ -134,7 +134,7 @@ export default function Landing() {
     setScreenshotSrc(null)
     try {
       const res = await fetch(
-        `${API_URL}/api/screenshot?url=${encodeURIComponent(demoUrl)}&api_key=test-key-123&block_ads=true`
+        `${API_URL}/api/screenshot?url=${encodeURIComponent(demoUrl)}&api_key=demo-key-shotly&block_ads=true`
       )
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))

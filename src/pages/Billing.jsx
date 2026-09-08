@@ -5,10 +5,10 @@ import { useAuth } from '../lib/auth'
 const API_URL = 'https://api.shotlyapi.in'
 
 const PLANS = {
-  trial:   { name: 'Trial',   price: 1,  limit: 100,   type: 'one_time', duration: '7 days' },
-  starter: { name: 'Starter', price: 5,  limit: 2000,  type: 'subscription' },
-  growth:  { name: 'Growth',  price: 9,  limit: 4000,  type: 'subscription' },
-  pro:     { name: 'Pro',     price: 19, limit: 10000, type: 'subscription' },
+  trial:   { name: 'Trial',   price: 99,  limit: 100,   type: 'one_time', duration: '7 days' },
+  starter: { name: 'Starter', price: 499, limit: 2000,  type: 'subscription' },
+  growth:  { name: 'Growth',  price: 899, limit: 4000,  type: 'subscription' },
+  pro:     { name: 'Pro',     price: 1799, limit: 10000, type: 'subscription' },
 }
 
 const PLAN_FEATURES = {
@@ -16,6 +16,10 @@ const PLAN_FEATURES = {
   starter: ['PNG & JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads'],
   growth:  ['PNG & JPEG & WebP', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads', 'CSS / JS injection'],
   pro:     ['All formats (PNG/JPEG/WebP/PDF)', '4K resolution', 'Full Page capture', 'All viewports', 'R2 caching', 'Block Ads', 'CSS / JS injection', 'HTML-to-Image & Text extraction', 'Bulk API'],
+}
+
+function formatPrice(price) {
+  return '\u20B9' + price.toLocaleString('en-IN')
 }
 
 export default function Billing() {
@@ -60,7 +64,7 @@ export default function Billing() {
         if (data.error) throw new Error(data.error)
 
         if (data.demo) {
-          alert('Demo mode: In production, this would open Razorpay checkout for ' + PLANS[planKey].name + ' plan ($' + PLANS[planKey].price + '). Complete Razorpay KYC to enable live payments.')
+          alert('Demo mode: In production, this would open Razorpay checkout for ' + PLANS[planKey].name + ' plan (' + formatPrice(PLANS[planKey].price) + '). Complete Razorpay KYC to enable live payments.')
           setCurrentPlan(planKey)
           setUpgrading(null)
           return
@@ -72,7 +76,6 @@ export default function Billing() {
           return
         }
 
-        // Build Razorpay checkout options based on payment type
         const plan = PLANS[planKey]
         const isSubscription = data.type === 'subscription' || plan.type === 'subscription'
 
@@ -81,11 +84,10 @@ export default function Billing() {
           name: 'ShotlyAPI',
           description: plan.name + ' Plan',
           amount: data.amount,
-          currency: 'USD',
+          currency: 'INR',
           prefill: { email: user.email },
           theme: { color: '#7c3aed' },
           handler: function(response) {
-            // Build verify payload based on payment type
             let verifyBody
             if (isSubscription) {
               verifyBody = {
@@ -116,7 +118,6 @@ export default function Billing() {
                 if (result.success) {
                   alert('Payment successful! Your plan has been activated.')
                   setCurrentPlan(planKey)
-                  // Refresh usage data
                   fetch(`${API_URL}/api/usage`, {
                     headers: { 'Authorization': 'Bearer ' + user.token }
                   })
@@ -140,8 +141,6 @@ export default function Billing() {
           }
         }
 
-        // For one-time payments: use order_id
-        // For subscriptions: use subscription_id
         if (isSubscription && data.subscription_id) {
           options.subscription_id = data.subscription_id
         } else if (data.order_id) {
@@ -202,11 +201,11 @@ export default function Billing() {
                     <div className="plan-name">{PLANS[currentPlan]?.name || 'Unknown'} Plan</div>
                     <div className="plan-price">
                       {PLANS[currentPlan]?.type === 'one_time'
-                        ? `$${PLANS[currentPlan]?.price} one-time — ${PLANS[currentPlan]?.limit} screenshots for ${PLANS[currentPlan]?.duration}`
-                        : `$${PLANS[currentPlan]?.price}/mo — ${PLANS[currentPlan]?.limit} screenshots per month`
+                        ? formatPrice(PLANS[currentPlan]?.price) + ' one-time \u2014 ' + PLANS[currentPlan]?.limit + ' screenshots for ' + PLANS[currentPlan]?.duration
+                        : formatPrice(PLANS[currentPlan]?.price) + '/mo \u2014 ' + PLANS[currentPlan]?.limit + ' screenshots per month'
                       }
                       {usageData?.trial_expired && currentPlan === 'trial' && (
-                        <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>— EXPIRED</span>
+                        <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>\u2014 EXPIRED</span>
                       )}
                     </div>
                   </>
@@ -234,11 +233,11 @@ export default function Billing() {
                     {key === currentPlan && <div className="price-badge">Current Plan</div>}
                     <div className="price-name">{plan.name}</div>
                     <div className="price-amount">
-                      ${plan.price}
+                      {formatPrice(plan.price)}
                       <span className="period">{plan.type === 'one_time' ? '' : '/mo'}</span>
                     </div>
                     <div className="price-desc">
-                      {plan.limit} screenshots{plan.type === 'one_time' ? ` / ${plan.duration}` : ' / month'}
+                      {plan.limit} screenshots{plan.type === 'one_time' ? ' / ' + plan.duration : ' / month'}
                     </div>
                     <ul className="price-features">
                       {PLAN_FEATURES[key].map((feat, i) => (
@@ -256,7 +255,7 @@ export default function Billing() {
                         {upgrading === key
                           ? 'Processing...'
                           : key === 'trial'
-                            ? 'Buy Trial — $1'
+                            ? 'Buy Trial \u2014 ' + formatPrice(99)
                             : 'Subscribe'
                         }
                       </button>
@@ -275,9 +274,9 @@ export default function Billing() {
                 lineHeight: 1.6
               }}>
                 <strong style={{ color: '#7c3aed' }}>How billing works:</strong><br/>
-                • <strong>Trial ($1)</strong> — One-time payment. 100 screenshots for 7 days. After 7 days, your account stops working until you buy a monthly plan.<br/>
-                • <strong>Monthly plans</strong> — Auto-recurring subscription via Razorpay. Billed automatically every month. Cancel anytime from your Razorpay dashboard or by contacting support.<br/>
-                • All payments are processed securely by Razorpay. We never store your card details.
+                {'\u2022'} <strong>Trial ({formatPrice(99)})</strong> — One-time payment. 100 screenshots for 7 days. After 7 days, your account stops working until you buy a monthly plan.<br/>
+                {'\u2022'} <strong>Monthly plans</strong> — Auto-recurring subscription via Razorpay. Billed automatically every month. Cancel anytime from your Razorpay dashboard or by contacting support.<br/>
+                {'\u2022'} All payments are processed securely by Razorpay. We never store your card details. UPI, cards, and wallets supported.
               </div>
             </div>
           </div>

@@ -12,14 +12,14 @@ const PLANS = {
 }
 
 const PLAN_FEATURES = {
-  trial:   ['PNG & JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', '7-day access period'],
-  starter: ['PNG & JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads'],
-  growth:  ['PNG & JPEG & WebP', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads', 'CSS / JS injection'],
-  pro:     ['All formats (PNG/JPEG/WebP/PDF)', '4K resolution', 'Full Page capture', 'All viewports', 'R2 caching', 'Block Ads', 'CSS / JS injection', 'HTML-to-Image & Text extraction', 'Bulk API'],
+  trial:   ['PNG and JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', '7-day access period'],
+  starter: ['PNG and JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads'],
+  growth:  ['PNG, JPEG and WebP', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads', 'CSS / JS injection'],
+  pro:     ['All formats (PNG/JPEG/WebP/PDF)', '4K resolution', 'Full Page capture', 'All viewports', 'R2 caching', 'Block Ads', 'CSS / JS injection', 'HTML-to-Image and Text extraction', 'Bulk API'],
 }
 
 function formatPrice(price) {
-  return '₹' + price.toLocaleString('en-IN')
+  return 'Rs.' + price.toLocaleString('en-IN')
 }
 
 export default function Billing() {
@@ -35,7 +35,7 @@ export default function Billing() {
 
   useEffect(() => {
     if (user) {
-      fetch(`${API_URL}/api/usage`, {
+      fetch(API_URL + '/api/usage', {
         headers: { 'Authorization': 'Bearer ' + user.token }
       })
         .then(r => r.json())
@@ -51,7 +51,7 @@ export default function Billing() {
 
   function upgrade(planKey) {
     setUpgrading(planKey)
-    fetch(`${API_URL}/api/billing/create-order`, {
+    fetch(API_URL + '/api/billing/create-order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export default function Billing() {
               }
             }
 
-            fetch(`${API_URL}/api/billing/verify`, {
+            fetch(API_URL + '/api/billing/verify', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export default function Billing() {
                 if (result.success) {
                   alert('Payment successful! Your plan has been activated.')
                   setCurrentPlan(planKey)
-                  fetch(`${API_URL}/api/usage`, {
+                  fetch(API_URL + '/api/usage', {
                     headers: { 'Authorization': 'Bearer ' + user.token }
                   })
                     .then(r => r.json())
@@ -156,7 +156,7 @@ export default function Billing() {
       })
   }
 
-  if (loading || !user) return <div className="auth-page"><p>Loading...</p></div>
+  if (loading || !user) return React.createElement('div', {className: 'auth-page'}, React.createElement('p', null, 'Loading...'))
 
   const planEntries = Object.entries(PLANS)
 
@@ -198,13 +198,13 @@ export default function Billing() {
                   </>
                 ) : (
                   <>
-                    <div className="plan-name">{PLANS[currentPlan]?.name || 'Unknown'} Plan</div>
+                    <div className="plan-name">{PLANS[currentPlan] ? PLANS[currentPlan].name : 'Unknown'} Plan</div>
                     <div className="plan-price">
-                      {PLANS[currentPlan]?.type === 'one_time'
-                        ? formatPrice(PLANS[currentPlan]?.price) + ' one-time - ' + PLANS[currentPlan]?.limit + ' screenshots for ' + PLANS[currentPlan]?.duration
-                        : formatPrice(PLANS[currentPlan]?.price) + '/mo - ' + PLANS[currentPlan]?.limit + ' screenshots per month'
+                      {PLANS[currentPlan] && PLANS[currentPlan].type === 'one_time'
+                        ? formatPrice(PLANS[currentPlan].price) + ' one-time - ' + PLANS[currentPlan].limit + ' screenshots for ' + PLANS[currentPlan].duration
+                        : PLANS[currentPlan] ? formatPrice(PLANS[currentPlan].price) + '/mo - ' + PLANS[currentPlan].limit + ' screenshots per month' : ''
                       }
-                      {usageData?.trial_expired && currentPlan === 'trial' && (
+                      {usageData && usageData.trial_expired && currentPlan === 'trial' && (
                         <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>- EXPIRED</span>
                       )}
                     </div>
@@ -212,7 +212,7 @@ export default function Billing() {
                 )}
               </div>
 
-              {usageData?.trial_expired && currentPlan === 'trial' && (
+              {usageData && usageData.trial_expired && currentPlan === 'trial' && (
                 <div style={{
                   background: 'rgba(239, 68, 68, 0.1)',
                   border: '1px solid rgba(239, 68, 68, 0.3)',
@@ -229,7 +229,7 @@ export default function Billing() {
               <h3 style={{ marginBottom: '16px', fontSize: '20px' }}>Available Plans</h3>
               <div className="pricing-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
                 {planEntries.map(([key, plan]) => (
-                  <div key={key} className={`price-card ${key === 'growth' ? 'popular' : ''}`}>
+                  <div key={key} className={key === 'growth' ? 'price-card popular' : 'price-card'}>
                     {key === currentPlan && <div className="price-badge">Current Plan</div>}
                     <div className="price-name">{plan.name}</div>
                     <div className="price-amount">
@@ -248,7 +248,7 @@ export default function Billing() {
                       <button className="btn btn-outline" disabled>Current</button>
                     ) : (
                       <button
-                        className={`btn ${key === 'trial' ? 'btn-outline' : 'btn-primary'}`}
+                        className={key === 'trial' ? 'btn btn-outline' : 'btn btn-primary'}
                         onClick={() => upgrade(key)}
                         disabled={upgrading === key}
                       >
@@ -274,9 +274,9 @@ export default function Billing() {
                 lineHeight: 1.6
               }}>
                 <strong style={{ color: '#7c3aed' }}>How billing works:</strong><br/>
-                {'•'} <strong>Trial ({formatPrice(99)})</strong> - One-time payment. 100 screenshots for 7 days. After 7 days, your account stops working until you buy a monthly plan.<br/>
-                {'•'} <strong>Monthly plans</strong> - Auto-recurring subscription via Razorpay. Billed automatically every month. Cancel anytime from your Razorpay dashboard or by contacting support.<br/>
-                {'•'} All payments are processed securely by Razorpay. We never store your card details. UPI, cards, and wallets supported.
+                - <strong>Trial ({formatPrice(99)})</strong> - One-time payment. 100 screenshots for 7 days. After 7 days, your account stops working until you buy a monthly plan.<br/>
+                - <strong>Monthly plans</strong> - Auto-recurring subscription via Razorpay. Billed automatically every month. Cancel anytime from your Razorpay dashboard or by contacting support.<br/>
+                - All payments are processed securely by Razorpay. We never store your card details. UPI, cards, and wallets supported.
               </div>
             </div>
           </div>

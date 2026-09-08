@@ -62,10 +62,10 @@ const testimonials = [
 ]
 
 const pricingTiers = [
-  { name: 'Trial', amount: '$1', period: '/one-time', desc: '100 screenshots / 7 days', features: ['100 screenshots for 7 days', 'PNG & JPEG formats', 'Mobile, Tablet & Desktop viewport', 'Full page capture', 'Community support'], cta: 'Start Trial', popular: false },
-  { name: 'Starter', amount: '$5', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
-  { name: 'Growth', amount: '$9', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
-  { name: 'Pro', amount: '$19', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
+  { name: 'Trial', amount: 'Rs.99', period: '/one-time', desc: '100 screenshots / 7 days', features: ['100 screenshots for 7 days', 'PNG & JPEG formats', 'Mobile, Tablet & Desktop viewport', 'Full page capture', 'Community support'], cta: 'Start Trial', popular: false },
+  { name: 'Starter', amount: 'Rs.499', period: '/mo', desc: '2,000 screenshots / month', features: ['2,000 screenshots / month', 'All image formats + PDF', 'CSS & JS injection', 'Custom viewport', 'Email support'], cta: 'Get Starter', popular: false },
+  { name: 'Growth', amount: 'Rs.899', period: '/mo', desc: '4,000 screenshots / month', features: ['4,000 screenshots / month', 'Everything in Starter', 'Ad & banner blocking', 'HTML to Image', 'Text extraction', 'Priority support'], cta: 'Get Growth', popular: true },
+  { name: 'Pro', amount: 'Rs.1799', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
 ]
 
 const faqs = [
@@ -155,7 +155,7 @@ export default function Landing() {
       <nav>
         <div className="nav-inner container">
           <Link to="/" className="logo">
-            <span className="logo-mark">S</span>
+            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
             ShotlyAPI
           </Link>
           <div className="nav-links">
@@ -194,7 +194,7 @@ export default function Landing() {
             screenshot or PDF with a single API call. Built on Cloudflare's edge network.
           </p>
           <div className="hero-cta">
-            <Link to="/signup" className="btn btn-primary btn-lg">Get Started for $1</Link>
+            <Link to="/signup" className="btn btn-primary btn-lg">Get Started for Rs.99</Link>
             <Link to="/playground" className="btn btn-outline btn-lg">Try Capture Studio</Link>
           </div>
 
@@ -279,7 +279,7 @@ export default function Landing() {
                 <div className="stat-label">Features</div>
               </div>
               <div>
-                <div className="stat-num">$1</div>
+                <div className="stat-num">Rs.99</div>
                 <div className="stat-label">Trial Plan</div>
               </div>
             </div>
@@ -417,7 +417,7 @@ export default function Landing() {
       {/* Pricing */}
       <section className="pricing" id="pricing">
         <h2 className="section-title">Simple, transparent pricing</h2>
-        <p className="section-sub">Start with a $1 trial. Upgrade when you need more power.</p>
+        <p className="section-sub">Start with a Rs.99 trial. Upgrade when you need more power.</p>
         <div className="pricing-grid">
           {pricingTiers.map((tier) => (
             <div className={`price-card ${tier.popular ? 'popular' : ''}`} key={tier.name}>
@@ -461,7 +461,7 @@ export default function Landing() {
           <div className="cta-inner">
             <h2>Ready to capture those screenshots?</h2>
             <p>Join thousands of developers building with ShotlyAPI.</p>
-            <Link to="/signup" className="btn btn-glow btn-lg">Get Started for $1</Link>
+            <Link to="/signup" className="btn btn-glow btn-lg">Get Started for Rs.99</Link>
           </div>
         </div>
       </section>
@@ -472,7 +472,7 @@ export default function Landing() {
           <div className="footer-grid">
             <div className="footer-col">
               <Link to="/" className="logo" style={{ marginBottom: '12px' }}>
-                <span className="logo-mark">S</span>
+                <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
                 ShotlyAPI
               </Link>
               <p>The fastest way to capture website screenshots and PDFs via API.</p>

@@ -15,14 +15,14 @@ const RZP_PLAN_IDS = {
 }
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://shotlyapi.in',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 function jsonResponse(data, status) {
   if (!status) status = 200
-  return new Response(JSON.stringify(data), { status: status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } })
+  return new Response(JSON.stringify(data), { status: status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } })
 }
 
 function jsonError(status, message) {
@@ -49,7 +49,7 @@ async function makeJWT(payload, secret) {
   const header = { alg: 'HS256', typ: 'JWT' }
   var enc = function(o) { return btoa(JSON.stringify(o)).replace(/=/g, '') }
   var data = enc(header) + '.' + enc(payload)
-  var sig = await sha256(data + secret)
+  var sig = await hmacSha256(data, secret)
   return data + '.' + sig
 }
 
@@ -57,7 +57,7 @@ async function verifyJWT(token, secret) {
   var parts = token.split('.')
   if (parts.length !== 3) return null
   var data = parts[0] + '.' + parts[1]
-  var sig = await sha256(data + secret)
+  var sig = await hmacSha256(data, secret)
   if (sig !== parts[2]) return null
   try { return JSON.parse(atob(parts[1])) } catch (e) { return null }
 }
@@ -187,7 +187,7 @@ export default {
       var hashedPw = await hashPassword(body.password, salt)
       var apiKey = generateApiKey()
       var userId = generateId()
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: userId, email: body.email, iat: Date.now() }, jwtSecret)
       await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, 'none', new Date().toISOString()).run()
       ctx.waitUntil(sendWelcomeEmail(env, body.email))
@@ -202,7 +202,7 @@ export default {
       if (!user) return jsonError(401, 'Invalid email or password')
       var hashedPw = await hashPassword(body.password, user.salt)
       if (hashedPw !== user.password_hash) return jsonError(401, 'Invalid email or password')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: user.id, email: user.email, iat: Date.now() }, jwtSecret)
       return jsonResponse({ token: token, api_key: user.api_key, email: user.email })
     }
@@ -212,7 +212,7 @@ export default {
       var auth = request.headers.get('Authorization')
       if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
       var token = auth.replace('Bearer ', '')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
@@ -225,7 +225,7 @@ export default {
       var auth = request.headers.get('Authorization')
       if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
       var token = auth.replace('Bearer ', '')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var newKey = generateApiKey()
@@ -239,7 +239,7 @@ export default {
       if (!body.email) return jsonError(400, 'Email required')
       var user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(body.email).first()
       if (!user) return jsonResponse({ success: true, message: 'If the email exists, a reset link has been sent.' })
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var resetToken = await makeJWT({ uid: user.id, email: user.email, reset: true, iat: Date.now(), exp: Date.now() + 3600000 }, jwtSecret)
       await env.DB.prepare('UPDATE users SET reset_token = ? WHERE id = ?').bind(resetToken, user.id).run()
       ctx.waitUntil(sendPasswordResetEmail(env, body.email, resetToken))
@@ -251,7 +251,7 @@ export default {
       var body = await request.json()
       if (!body.token || !body.password) return jsonError(400, 'Token and new password required')
       if (body.password.length < 6) return jsonError(400, 'Password must be at least 6 characters')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(body.token, jwtSecret)
       if (!decoded || !decoded.reset) return jsonError(401, 'Invalid or expired reset token')
       if (Date.now() > decoded.exp) return jsonError(401, 'Reset token has expired')
@@ -268,7 +268,7 @@ export default {
       var auth = request.headers.get('Authorization')
       if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
       var token = auth.replace('Bearer ', '')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
@@ -284,7 +284,7 @@ export default {
       var auth = request.headers.get('Authorization')
       if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
       var token = auth.replace('Bearer ', '')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var body = await request.json()
@@ -325,7 +325,7 @@ export default {
       var auth = request.headers.get('Authorization')
       if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
       var token = auth.replace('Bearer ', '')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var body = await request.json()
@@ -377,7 +377,8 @@ export default {
       var body = await request.json()
       var webhookSig = request.headers.get('X-Razorpay-Signature')
       var webhookSecret = env.RZP_WEBHOOK_SECRET
-      if (webhookSecret) {
+      if (!webhookSecret) return jsonError(500, 'Webhook secret not configured')
+      {
         var rawBody = JSON.stringify(body)
         var expectedWhSig = await hmacSha256(rawBody, webhookSecret)
         if (webhookSig !== expectedWhSig) return jsonError(401, 'Invalid webhook signature')
@@ -408,7 +409,7 @@ export default {
       var auth = request.headers.get('Authorization')
       if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
       var token = auth.replace('Bearer ', '')
-      var jwtSecret = env.JWT_SECRET || 'shotly-secret-change-me'
+      var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var body = await request.json()
@@ -418,7 +419,7 @@ export default {
       if (user.plan === 'none') return jsonError(403, 'No active plan. Purchase at https://shotlyapi.in/billing')
       if (isTrialExpired(user)) return jsonError(403, 'Trial expired. Upgrade at https://shotlyapi.in/billing')
       var oracleUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot/bulk'
-      var response = await fetch(oracleUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(120000) })
+      var response = await fetch(oracleUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Server-Secret': env.SERVER_SECRET || '' }, body: JSON.stringify(body), signal: AbortSignal.timeout(120000) })
       if (body.urls && Array.isArray(body.urls)) { for (var i = 0; i < body.urls.length; i++) { await logUsage(env, body.api_key, body.urls[i]) } }
       var data = await response.json()
       return jsonResponse(data)
@@ -440,7 +441,7 @@ export default {
       if (params.extract_text === 'true') {
         var oracleUrl = buildOracleUrl(env, params)
         try {
-          var resp = await fetch(oracleUrl, { signal: AbortSignal.timeout(45000) })
+          var resp = await fetch(oracleUrl, { signal: AbortSignal.timeout(45000), headers: { 'X-Server-Secret': env.SERVER_SECRET || '' } })
           if (!resp.ok) return jsonError(500, 'Text extraction failed.')
           var tdata = await resp.json()
           await logUsage(env, params.api_key, params.url || 'custom_html')
@@ -454,19 +455,19 @@ export default {
         if (cached) {
           await logUsage(env, params.api_key, params.url || 'custom_html')
           var ct = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
-          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': '*' } })
+          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': 'https://shotlyapi.in' } })
         }
       }
 
       var oracleUrl2 = buildOracleUrl(env, params)
       try {
-        var resp2 = await fetch(oracleUrl2, { signal: AbortSignal.timeout(45000) })
+        var resp2 = await fetch(oracleUrl2, { signal: AbortSignal.timeout(45000), headers: { 'X-Server-Secret': env.SERVER_SECRET || '' } })
         if (!resp2.ok) return jsonError(500, 'Screenshot failed. The URL might not be accessible.')
         var imageBuffer = await resp2.arrayBuffer()
         if (env.SCREENSHOTS) { await env.SCREENSHOTS.put(cacheKey, imageBuffer, { customMetadata: { url: params.url || 'custom_html', created: new Date().toISOString() } }) }
         await logUsage(env, params.api_key, params.url || 'custom_html')
         var ct2 = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
-        return new Response(imageBuffer, { headers: { 'Content-Type': ct2, 'X-Cache': 'MISS', 'Access-Control-Allow-Origin': '*' } })
+        return new Response(imageBuffer, { headers: { 'Content-Type': ct2, 'X-Cache': 'MISS', 'Access-Control-Allow-Origin': 'https://shotlyapi.in' } })
       } catch (e) {
         return jsonError(500, 'Could not reach screenshot server. Try again in a few seconds.')
       }

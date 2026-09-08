@@ -4,6 +4,24 @@
 const express = require('express')
 const puppeteer = require('puppeteer')
 const app = express()
+// ===== AUTH: Shared secret between Worker and Oracle server =====
+const SERVER_SECRET = process.env.SERVER_SECRET || ''
+if (!SERVER_SECRET) {
+  console.error('CRITICAL: SERVER_SECRET env var not set! Server is insecure.')
+}
+
+// Middleware to verify shared secret on all API routes
+app.use('/api', (req, res, next) => {
+  // Skip auth for health check
+  if (req.path === '/health') return next()
+  // Check for shared secret header
+  const provided = req.headers['x-server-secret']
+  if (!SERVER_SECRET || provided !== SERVER_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  next()
+})
+
 
 const PORT = process.env.PORT || 3000
 const CHROMIUM_PATH = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
@@ -145,6 +163,39 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+
+// ===== SSRF Protection: Block internal/private URLs =====
+function isUrlBlocked(urlStr) {
+  try {
+    const parsed = new URL(urlStr)
+    const hostname = parsed.hostname
+    
+    // Block non-http protocols
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return true
+    
+    // Block localhost, internal IPs, metadata endpoints
+    const blocked = [
+      'localhost', '127.0.0.1', '0.0.0.0', '::1',
+      '169.254.169.254', // Cloud metadata
+      'metadata.google.internal',
+      '10.0.0.30', // Oracle internal IP
+    ]
+    
+    if (blocked.indexOf(hostname) !== -1) return true
+    
+    // Block private IP ranges
+    if (hostname.match(/^10\./)) return true
+    if (hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) return true
+    if (hostname.match(/^192\.168\./)) return true
+    if (hostname.match(/^169\.254\./)) return true
+    if (hostname.match(/^100\.6[4-9]\./) || hostname.match(/^100\.[7-9][0-9]\./) || hostname.match(/^100\.1[0-1][0-9]\./) || hostname.match(/^100\.12[0-7]\./)) return true
+    
+    return false
+  } catch (e) {
+    return true // Invalid URL = blocked
+  }
+}
+
 // ===== Single screenshot =====
 app.get('/api/screenshot', async (req, res) => {
   const targetUrl = req.query.url
@@ -152,6 +203,10 @@ app.get('/api/screenshot', async (req, res) => {
 
   if (!targetUrl && !customHtml) {
     return res.status(400).json({ error: 'Missing url or custom_html parameter' })
+  }
+
+  if (targetUrl && isUrlBlocked(targetUrl)) {
+    return res.status(403).json({ error: 'URL not allowed' })
   }
 
   const format = req.query.format || 'png'
@@ -262,7 +317,7 @@ app.get('/api/screenshot', async (req, res) => {
 
   } catch (err) {
     console.error('Screenshot error:', err.message)
-    res.status(500).json({ error: 'Failed to capture screenshot', detail: err.message })
+    res.status(500).json({ error: 'Failed to capture screenshot' })
   } finally {
     if (page) {
       try { await page.close() } catch {}
@@ -280,6 +335,11 @@ app.post('/api/screenshot/bulk', express.json(), async (req, res) => {
   }
   if (urls.length > 50) {
     return res.status(400).json({ error: 'Maximum 50 URLs per bulk request' })
+  }
+
+  // SSRF check on all URLs
+  for (const u of urls) {
+    if (isUrlBlocked(u)) return res.status(403).json({ error: 'URL not allowed: ' + u })
   }
 
   const opts = {
@@ -321,7 +381,7 @@ app.post('/api/screenshot/bulk', express.json(), async (req, res) => {
       results.push({
         url: targetUrl,
         success: false,
-        error: err.message,
+        error: 'Capture failed',
       })
     } finally {
       if (page) {
@@ -333,7 +393,7 @@ app.post('/api/screenshot/bulk', express.json(), async (req, res) => {
   res.json({ results })
 })
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log('ShotlyAPI screenshot server v3.0 running on port ' + PORT)
   console.log('Using Chromium at: ' + CHROMIUM_PATH)
   console.log('Features: PNG, JPEG, PDF, full_page, viewport, delay, wait_for_selector, wait_for_event, selector, user_agent, cookies, hide_elements, block_ads, css_injection, js_injection, custom_html, extract_text, bulk')

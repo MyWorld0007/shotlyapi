@@ -21,9 +21,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-function jsonResponse(data, status) {
+function jsonResponse(data, status, extraHeaders) {
   if (!status) status = 200
-  return new Response(JSON.stringify(data), { status: status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' } })
+  var headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Credentials': 'true', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' }
+  if (extraHeaders) { for (var k in extraHeaders) headers[k] = extraHeaders[k] }
+  return new Response(JSON.stringify(data), { status: status, headers: headers })
 }
 
 function jsonError(status, message) {
@@ -77,6 +79,65 @@ async function hashPassword(password, salt) {
   return await sha256(password + salt)
 }
 
+// PBKDF2 password hashing (100k iterations)
+async function hashPasswordPBKDF2(password, salt) {
+  var enc = new TextEncoder()
+  var keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits'])
+  var derived = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: 100000, hash: 'SHA-256' }, keyMaterial, 256)
+  return 'pbkdf2:100000:' + salt + ':' + Array.from(new Uint8Array(derived)).map(function(b) { return b.toString(16).padStart(2, '0') }).join('')
+}
+
+// Verify password - supports both PBKDF2 (new) and SHA-256 (legacy)
+async function verifyPassword(password, storedHash, salt) {
+  if (storedHash && storedHash.indexOf('pbkdf2:') === 0) {
+    var parts = storedHash.split(':')
+    var iterations = parseInt(parts[1])
+    var storedSalt = parts[2]
+    var storedDerived = parts[3]
+    var enc = new TextEncoder()
+    var keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits'])
+    var derived = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(storedSalt), iterations: iterations, hash: 'SHA-256' }, keyMaterial, 256)
+    var computed = Array.from(new Uint8Array(derived)).map(function(b) { return b.toString(16).padStart(2, '0') }).join('')
+    return computed === storedDerived
+  } else {
+    var legacyHash = await sha256(password + salt)
+    return legacyHash === storedHash
+  }
+}
+
+// API key hashing (SHA-256 is fine for high-entropy keys)
+async function hashApiKey(apiKey) {
+  return await sha256(apiKey)
+}
+
+function apiKeyDisplay(apiKey) {
+  if (!apiKey) return 'sk_live_...'
+  return apiKey.substring(0, 12) + '...' + apiKey.substring(apiKey.length - 4)
+}
+
+// Cookie helpers
+function setAuthCookie(token) {
+  return 'shotly_token=' + token + '; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800; Domain=.shotlyapi.in'
+}
+
+function clearAuthCookie() {
+  return 'shotly_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; Domain=.shotlyapi.in'
+}
+
+function getCookie(request, name) {
+  var cookies = request.headers.get('Cookie') || ''
+  var match = cookies.match(new RegExp('(^|;\\s*)' + name + '=([^;]+)'))
+  return match ? match[2] : null
+}
+
+function getTokenFromRequest(request) {
+  var cookieToken = getCookie(request, 'shotly_token')
+  if (cookieToken) return cookieToken
+  var auth = request.headers.get('Authorization')
+  if (auth && auth.indexOf('Bearer ') === 0) return auth.replace('Bearer ', '')
+  return null
+}
+
 // ===== Email =====
 async function sendEmail(env, to, subject, html) {
   if (!env.RESEND_API_KEY) return { skipped: true }
@@ -89,26 +150,34 @@ async function sendEmail(env, to, subject, html) {
 }
 
 async function sendWelcomeEmail(env, email) {
-  var html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Welcome to ShotlyAPI!</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;"><code style="font-size:14px;color:#2563eb;word-break:break-all;">curl "https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY" -o screenshot.png</code></div><a href="https://shotlyapi.in/billing" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Buy Trial Plan</a><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
+  var html = '<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;\"><div style=\"background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);\"><div style=\"display:flex;align-items:center;gap:10px;margin-bottom:32px;\"><div style=\"width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;\">S</div><span style=\"font-size:22px;font-weight:800;color:#0f172a;\">ShotlyAPI</span></div><h1 style=\"font-size:24px;color:#0f172a;margin:0 0 16px;\">Welcome to ShotlyAPI!</h1><p style=\"font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;\">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style=\"background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;\"><code style=\"font-size:14px;color:#2563eb;word-break:break-all;\">curl \"https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY\" -o screenshot.png</code></div><a href=\"https://shotlyapi.in/billing\" style=\"display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;\">Buy Trial Plan</a><hr style=\"border:none;border-top:1px solid #e2e8f0;margin:32px 0;\"><p style=\"font-size:13px;color:#94a3b8;margin:0;\">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
   return await sendEmail(env, email, 'Welcome to ShotlyAPI!', html)
 }
 
 async function sendPasswordResetEmail(env, email, resetToken) {
   var resetUrl = 'https://shotlyapi.in/reset-password?token=' + resetToken
-  var html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Reset your password</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px;">Click the button below to set a new password. This link expires in 1 hour.</p><a href="' + resetUrl + '" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Reset Password</a><p style="font-size:14px;color:#64748b;margin:24px 0 0;">If you did not request this, you can safely ignore this email.</p><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI.</p></div></div>'
+  var html = '<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;\"><div style=\"background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);\"><div style=\"display:flex;align-items:center;gap:10px;margin-bottom:32px;\"><div style=\"width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;\">S</div><span style=\"font-size:22px;font-weight:800;color:#0f172a;\">ShotlyAPI</span></div><h1 style=\"font-size:24px;color:#0f172a;margin:0 0 16px;\">Reset your password</h1><p style=\"font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px;\">Click the button below to set a new password. This link expires in 1 hour.</p><a href=\"' + resetUrl + '\" style=\"display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;\">Reset Password</a><p style=\"font-size:14px;color:#64748b;margin:24px 0 0;\">If you did not request this, you can safely ignore this email.</p><hr style=\"border:none;border-top:1px solid #e2e8f0;margin:32px 0;\"><p style=\"font-size:13px;color:#94a3b8;margin:0;\">(c) 2026 ShotlyAPI.</p></div></div>'
   return await sendEmail(env, email, 'Reset your ShotlyAPI password', html)
 }
 
 async function logUsage(env, apiKey, targetUrl) {
-  await env.DB.prepare('INSERT INTO usage (api_key, url) VALUES (?, ?)').bind(apiKey, targetUrl).run()
+  var hashed = await hashApiKey(apiKey)
+  await env.DB.prepare('INSERT INTO usage (api_key, url) VALUES (?, ?)').bind(hashed, targetUrl).run()
 }
 
 async function getUserByApiKey(env, apiKey) {
+  var hashed = await hashApiKey(apiKey)
+  // Try hashed lookup first (new accounts)
+  var user = await env.DB.prepare('SELECT * FROM users WHERE api_key_hash = ?').bind(hashed).first()
+  if (user) return user
+  // Fall back to plaintext lookup (legacy accounts, demo key)
   return await env.DB.prepare('SELECT * FROM users WHERE api_key = ?').bind(apiKey).first()
 }
 
 async function getUsageCount(env, apiKey) {
-  var result = await env.DB.prepare("SELECT COUNT(*) as count FROM usage WHERE api_key = ? AND timestamp >= datetime('now', '-30 days')").bind(apiKey).first()
+  // Try both hashed and plaintext for backward compat
+  var hashed = await hashApiKey(apiKey)
+  var result = await env.DB.prepare("SELECT COUNT(*) as count FROM usage WHERE (api_key = ? OR api_key = ?) AND timestamp >= datetime('now', '-30 days')").bind(hashed, apiKey).first()
   return (result && result.count) || 0
 }
 
@@ -210,14 +279,16 @@ export default {
       var existing = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(body.email).first()
       if (existing) { ctx.waitUntil(logAttempt(env, clientIP, 'signup')); return jsonError(409, 'Email already registered') }
       var salt = generateId()
-      var hashedPw = await hashPassword(body.password, salt)
+      var hashedPw = await hashPasswordPBKDF2(body.password, salt)
       var apiKey = generateApiKey()
+      var apiKeyHash = await hashApiKey(apiKey)
+      var apiKeyDisplayVal = apiKeyDisplay(apiKey)
       var userId = generateId()
       var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: userId, email: body.email, iat: Date.now() }, jwtSecret)
-      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, 'none', new Date().toISOString()).run()
+      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKeyHash, apiKeyDisplayVal, 'none', new Date().toISOString()).run()
       ctx.waitUntil(sendWelcomeEmail(env, body.email))
-      return jsonResponse({ token: token, api_key: apiKey, email: body.email })
+      return jsonResponse({ token: token, api_key: apiKey, api_key_display: apiKeyDisplayVal, email: body.email }, 200, { 'Set-Cookie': setAuthCookie(token) })
     }
 
     // AUTH: LOGIN
@@ -230,37 +301,50 @@ export default {
       if (!body.email || !body.password) return jsonError(400, 'Email and password required')
       var user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(body.email).first()
       if (!user) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
-      var hashedPw = await hashPassword(body.password, user.salt)
-      if (hashedPw !== user.password_hash) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
+      var isValid = await verifyPassword(body.password, user.password_hash, user.salt)
+      if (!isValid) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
+      // Migrate old SHA-256 hash to PBKDF2 on successful login
+      if (user.password_hash && user.password_hash.indexOf('pbkdf2:') !== 0) {
+        var newSalt = generateId()
+        var newHash = await hashPasswordPBKDF2(body.password, newSalt)
+        await env.DB.prepare('UPDATE users SET password_hash = ?, salt = ? WHERE id = ?').bind(newHash, newSalt, user.id).run()
+      }
       var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: user.id, email: user.email, iat: Date.now() }, jwtSecret)
-      return jsonResponse({ token: token, api_key: user.api_key, email: user.email })
+      var displayKey = user.api_key_display || apiKeyDisplay(user.api_key) || 'sk_live_...'
+      return jsonResponse({ token: token, api_key_display: displayKey, email: user.email }, 200, { 'Set-Cookie': setAuthCookie(token) })
     }
 
     // AUTH: ME
     if (path === '/api/auth/me' && request.method === 'GET') {
-      var auth = request.headers.get('Authorization')
-      if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
-      var token = auth.replace('Bearer ', '')
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
       if (!user) return jsonError(404, 'User not found')
-      return jsonResponse({ id: user.id, email: user.email, api_key: user.api_key, plan: user.plan, trial_expired: isTrialExpired(user) })
+      var displayKey = user.api_key_display || apiKeyDisplay(user.api_key) || 'sk_live_...'
+      return jsonResponse({ id: user.id, email: user.email, api_key_display: displayKey, plan: user.plan, trial_expired: isTrialExpired(user) })
+    }
+
+    // AUTH: LOGOUT
+    if (path === '/api/auth/logout' && request.method === 'POST') {
+      return jsonResponse({ success: true }, 200, { 'Set-Cookie': clearAuthCookie() })
     }
 
     // AUTH: REGENERATE
     if (path === '/api/auth/regenerate' && request.method === 'POST') {
-      var auth = request.headers.get('Authorization')
-      if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
-      var token = auth.replace('Bearer ', '')
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
       var newKey = generateApiKey()
-      await env.DB.prepare('UPDATE users SET api_key = ? WHERE id = ?').bind(newKey, decoded.uid).run()
-      return jsonResponse({ api_key: newKey })
+      var newHash = await hashApiKey(newKey)
+      var newDisplay = apiKeyDisplay(newKey)
+      await env.DB.prepare('UPDATE users SET api_key = NULL, api_key_hash = ?, api_key_display = ? WHERE id = ?').bind(newHash, newDisplay, decoded.uid).run()
+      return jsonResponse({ api_key: newKey, api_key_display: newDisplay }, 200, { 'Set-Cookie': setAuthCookie(token) })
     }
 
     // AUTH: FORGOT PASSWORD
@@ -291,16 +375,15 @@ export default {
       var user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND reset_token = ?').bind(decoded.uid, body.token).first()
       if (!user) return jsonError(401, 'Invalid reset token')
       var newSalt = generateId()
-      var newHash = await hashPassword(body.password, newSalt)
+      var newHash = await hashPasswordPBKDF2(body.password, newSalt)
       await env.DB.prepare('UPDATE users SET password_hash = ?, salt = ?, reset_token = NULL WHERE id = ?').bind(newHash, newSalt, user.id).run()
       return jsonResponse({ success: true, message: 'Password reset successfully.' })
     }
 
     // USAGE
     if (path === '/api/usage' && request.method === 'GET') {
-      var auth = request.headers.get('Authorization')
-      if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
-      var token = auth.replace('Bearer ', '')
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
@@ -314,9 +397,8 @@ export default {
 
     // BILLING: CREATE ORDER / SUBSCRIPTION
     if (path === '/api/billing/create-order' && request.method === 'POST') {
-      var auth = request.headers.get('Authorization')
-      if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
-      var token = auth.replace('Bearer ', '')
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
@@ -355,9 +437,8 @@ export default {
 
     // BILLING: VERIFY
     if (path === '/api/billing/verify' && request.method === 'POST') {
-      var auth = request.headers.get('Authorization')
-      if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
-      var token = auth.replace('Bearer ', '')
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
@@ -439,9 +520,8 @@ export default {
 
     // BULK SCREENSHOT
     if (path === '/api/screenshot/bulk' && request.method === 'POST') {
-      var auth = request.headers.get('Authorization')
-      if (!auth || auth.indexOf('Bearer ') !== 0) return jsonError(401, 'Not authenticated')
-      var token = auth.replace('Bearer ', '')
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')

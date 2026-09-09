@@ -128,12 +128,12 @@ export default function Billing() {
                   alert('Payment verification failed. Please contact support.')
                 }
                 setUpgrading(null)
-            })
-             .catch(() => {
+              })
+              .catch(() => {
                 alert('Network error during verification. Please contact support.')
                 setUpgrading(null)
-            })
-         },
+              })
+          },
           modal: {
             ondismiss: function() {
               setUpgrading(null)
@@ -208,7 +208,7 @@ export default function Billing() {
                         <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>- EXPIRED</span>
                       )}
                     </div>
-                  <>
+                  </>
                 )}
               </div>
 
@@ -255,8 +255,8 @@ export default function Billing() {
                         {upgrading === key
                           ? 'Processing...'
                           : key === 'trial'
-                           ? 'Buy Trial - ' + formatPrice(99)
-                           : 'Subscribe'
+                            ? 'Buy Trial - ' + formatPrice(99)
+                            : 'Subscribe'
                        }
                       </button>
                     )}

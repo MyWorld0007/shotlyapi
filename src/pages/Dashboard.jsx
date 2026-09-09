@@ -190,7 +190,7 @@ export default function Dashboard() {
                   marginBottom: '24px',
                   fontSize: '14px'
                 }}>
-                  <strong>Trial active</strong> â Expires on {stats.trial_expires_at}. 
+                  <strong>Trial active</strong> â Expires on {stats.trial_expires_at}. 
                   You have {planLimit - stats.used} screenshots remaining.
                 </div>
               )}

@@ -20,7 +20,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.shotlyapi.in; font-src 'self'; frame-ancestors 'none'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.shotlyapi.in; font-src 'self'; frame-ancestors 'self' https://dash.cloudflare.com",
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -28,7 +28,7 @@ const corsHeaders = {
 
 function jsonResponse(data, status, extraHeaders) {
   if (!status) status = 200
-  var headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Credentials': 'true', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.shotlyapi.in; font-src 'self'; frame-ancestors 'none'", 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' }
+  var headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Credentials': 'true', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.shotlyapi.in; font-src 'self'; frame-ancestors 'self' https://dash.cloudflare.com", 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' }
   if (extraHeaders) { for (var k in extraHeaders) headers[k] = extraHeaders[k] }
   return new Response(JSON.stringify(data), { status: status, headers: headers })
 }

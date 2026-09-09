@@ -257,7 +257,7 @@ export default function Billing() {
                           : key === 'trial'
                             ? 'Buy Trial - ' + formatPrice(99)
                             : 'Subscribe'
-                       }
+                        }
                       </button>
                     )}
                   </div>

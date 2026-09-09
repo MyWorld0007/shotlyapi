@@ -20,11 +20,15 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.shotlyapi.in; font-src 'self'; frame-ancestors 'none'",
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
 }
 
 function jsonResponse(data, status, extraHeaders) {
   if (!status) status = 200
-  var headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Credentials': 'true', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' }
+  var headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Credentials': 'true', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.shotlyapi.in; font-src 'self'; frame-ancestors 'none'", 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' }
   if (extraHeaders) { for (var k in extraHeaders) headers[k] = extraHeaders[k] }
   return new Response(JSON.stringify(data), { status: status, headers: headers })
 }
@@ -543,12 +547,21 @@ export default {
     if (path === '/api/screenshot' && request.method === 'GET') {
       var params = getScreenshotParams(url)
       if (!params.url && !params.custom_html) return jsonError(400, 'Missing required parameter: url or custom_html')
-      if (!params.api_key) return jsonError(401, 'Missing required parameter: api_key')
-      var user = await getUserByApiKey(env, params.api_key)
+      // Check Authorization header first, fall back to URL param for demo key only
+      var headerKey = null
+      var authHdr = request.headers.get('Authorization')
+      if (authHdr && authHdr.indexOf('Bearer ') === 0) headerKey = authHdr.replace('Bearer ', '')
+      var apiKey = headerKey || params.api_key
+      if (!apiKey) return jsonError(401, 'Missing required parameter: api_key. Use Authorization header or api_key URL param')
+      // If using URL param (not header), only allow the demo key
+      if (!headerKey && params.api_key && params.api_key !== 'demo-key-shotly') {
+        return jsonError(401, 'For security, API keys must be sent via Authorization header. Example: Authorization: Bearer sk_live_xxx')
+      }
+      var user = await getUserByApiKey(env, apiKey)
       if (!user) return jsonError(401, 'Invalid API key. Get one at https://shotlyapi.in')
       if (user.plan === 'none') return jsonError(403, 'No active plan. Purchase at https://shotlyapi.in/billing')
       if (isTrialExpired(user)) return jsonError(403, 'Your 7-day Trial has expired. Upgrade at https://shotlyapi.in/billing')
-      var used = await getUsageCount(env, params.api_key)
+      var used = await getUsageCount(env, apiKey)
       var limit = (PLANS[user.plan] && PLANS[user.plan].limit) || 0
       if (used >= limit) return jsonError(403, 'Usage limit exceeded (' + used + '/' + limit + '). Upgrade at https://shotlyapi.in/billing')
 
@@ -558,7 +571,7 @@ export default {
           var resp = await fetch(oracleUrl, { signal: AbortSignal.timeout(45000), headers: { 'X-Server-Secret': env.SERVER_SECRET || '' } })
           if (!resp.ok) return jsonError(500, 'Text extraction failed.')
           var tdata = await resp.json()
-          await logUsage(env, params.api_key, params.url || 'custom_html')
+          await logUsage(env, apiKey, params.url || 'custom_html')
           return jsonResponse(tdata)
         } catch (e) { return jsonError(500, 'Could not reach screenshot server.') }
       }
@@ -567,9 +580,9 @@ export default {
       if (env.SCREENSHOTS && params.fresh !== 'true') {
         var cached = await env.SCREENSHOTS.get(cacheKey)
         if (cached) {
-          await logUsage(env, params.api_key, params.url || 'custom_html')
+          await logUsage(env, apiKey, params.url || 'custom_html')
           var ct = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
-          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': 'https://shotlyapi.in' } })
+          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
         }
       }
 
@@ -579,9 +592,9 @@ export default {
         if (!resp2.ok) return jsonError(500, 'Screenshot failed. The URL might not be accessible.')
         var imageBuffer = await resp2.arrayBuffer()
         if (env.SCREENSHOTS) { await env.SCREENSHOTS.put(cacheKey, imageBuffer, { customMetadata: { url: params.url || 'custom_html', created: new Date().toISOString() } }) }
-        await logUsage(env, params.api_key, params.url || 'custom_html')
+        await logUsage(env, apiKey, params.url || 'custom_html')
         var ct2 = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
-        return new Response(imageBuffer, { headers: { 'Content-Type': ct2, 'X-Cache': 'MISS', 'Access-Control-Allow-Origin': 'https://shotlyapi.in' } })
+        return new Response(imageBuffer, { headers: { 'Content-Type': ct2, 'X-Cache': 'MISS', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
       } catch (e) {
         return jsonError(500, 'Could not reach screenshot server. Try again in a few seconds.')
       }
@@ -590,4 +603,3 @@ export default {
     return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
   },
 }
-

@@ -36,7 +36,7 @@ export default function Billing() {
   useEffect(() => {
     if (user) {
       fetch(API_URL + '/api/usage', {
-        headers: { 'Authorization': 'Bearer ' + user.token }
+        credentials: 'include'
       })
         .then(r => r.json())
         .then(data => {
@@ -54,9 +54,9 @@ export default function Billing() {
     fetch(API_URL + '/api/billing/create-order', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + user.token
+        'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify({ plan: planKey })
     })
       .then(r => r.json())
@@ -108,9 +108,9 @@ export default function Billing() {
             fetch(API_URL + '/api/billing/verify', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + user.token
+                'Content-Type': 'application/json'
               },
+              credentials: 'include',
               body: JSON.stringify(verifyBody)
             })
               .then(r => r.json())
@@ -119,7 +119,7 @@ export default function Billing() {
                   alert('Payment successful! Your plan has been activated.')
                   setCurrentPlan(planKey)
                   fetch(API_URL + '/api/usage', {
-                    headers: { 'Authorization': 'Bearer ' + user.token }
+                    credentials: 'include'
                   })
                     .then(r => r.json())
                     .then(d => { if (d.stats) setUsageData(d.stats) })
@@ -128,12 +128,12 @@ export default function Billing() {
                   alert('Payment verification failed. Please contact support.')
                 }
                 setUpgrading(null)
-              })
-              .catch(() => {
+            })
+             .catch(() => {
                 alert('Network error during verification. Please contact support.')
                 setUpgrading(null)
-              })
-          },
+            })
+         },
           modal: {
             ondismiss: function() {
               setUpgrading(null)
@@ -208,7 +208,7 @@ export default function Billing() {
                         <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>- EXPIRED</span>
                       )}
                     </div>
-                  </>
+                  <>
                 )}
               </div>
 
@@ -255,9 +255,9 @@ export default function Billing() {
                         {upgrading === key
                           ? 'Processing...'
                           : key === 'trial'
-                            ? 'Buy Trial - ' + formatPrice(99)
-                            : 'Subscribe'
-                        }
+                           ? 'Buy Trial - ' + formatPrice(99)
+                           : 'Subscribe'
+                       }
                       </button>
                     )}
                   </div>

@@ -603,3 +603,4 @@ export default {
     return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
   },
 }
+

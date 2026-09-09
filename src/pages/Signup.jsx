@@ -10,6 +10,7 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [newApiKey, setNewApiKey] = useState(null)
   const { login } = useAuth()
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
@@ -21,15 +22,23 @@ export default function Signup() {
 
     fetch(`${API_URL}/api/auth/signup`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error)
-        return login(data.token)
+        if (data.api_key) setNewApiKey(data.api_key)
+        return login()
       })
-      .then(() => navigate('/dashboard'))
+      .then(() => {
+        if (newApiKey) {
+          navigate('/dashboard', { state: { newApiKey: newApiKey } })
+        } else {
+          navigate('/dashboard')
+        }
+      })
       .catch(err => {
         setError(err.message)
         setLoading(false)
@@ -45,7 +54,7 @@ export default function Signup() {
           ShotlyAPI
         </Link>
         <h2>Create your account</h2>
-        <p>Get a free API key and 50 screenshots per month.</p>
+        <p>Get an API key and start capturing screenshots.</p>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -57,7 +66,7 @@ export default function Signup() {
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} placeholder="Min 6 characters" />
           </div>
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Creating account...' : 'Sign Up Free'}
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
         <div className="auth-switch">

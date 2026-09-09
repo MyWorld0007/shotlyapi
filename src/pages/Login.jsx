@@ -21,13 +21,14 @@ export default function Login() {
 
     fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error)
-        return login(data.token)
+        return login()
       })
       .then(() => navigate('/dashboard'))
       .catch(err => {
@@ -64,7 +65,7 @@ export default function Login() {
           <Link to="/forgot-password">Forgot password?</Link>
         </div>
         <div className="auth-switch">
-          Don't have an account? <Link to="/signup">Sign up free</Link>
+          Don't have an account? <Link to="/signup">Sign up</Link>
         </div>
       </div>
     </div>

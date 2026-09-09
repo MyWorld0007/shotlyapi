@@ -240,22 +240,22 @@ function buildOracleUrl(env, params) {
   var baseUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot'
   var q = new URLSearchParams()
   if (params.url) q.set('url', params.url)
-  if (params.format && params.format !== 'png') q.set('format', `arams.format)
+  if (params.format && params.format !== 'png') q.set('format', params.format)
   if (params.width) q.set('width', params.width)
   if (params.height) q.set('height', params.height)
-  if (params.full_page) q.set('full_page', `arams.full_page)
+  if (params.full_page) q.set('full_page', params.full_page)
   if (params.delay) q.set('delay', params.delay)
-  if (params.wait_for_selector) q.set('wait_for_selector', `arams.wait_for_selector)
+  if (params.wait_for_selector) q.set('wait_for_selector', params.wait_for_selector)
   if (params.wait_for_event) q.set('wait_for_event', params.wait_for_event)
   if (params.selector) q.set('selector', params.selector)
   if (params.user_agent) q.set('user_agent', params.user_agent)
   if (params.cookies) q.set('cookies', params.cookies)
-  if (params.hide_elements) q.set('hide_elements', `arams.hide_elements)
+  if (params.hide_elements) q.set('hide_elements', params.hide_elements)
   if (params.block_ads) q.set('block_ads', params.block_ads)
-  if (params.css) q.set('css', `arams.css)
+  if (params.css) q.set('css', params.css)
   if (params.js) q.set('js', params.js)
-  if (params.custom_html) q.set('custom_html', `arams.custom_html)
-  if (params.extract_text) q.set('extract_text', `arams.extract_text)
+  if (params.custom_html) q.set('custom_html', params.custom_html)
+  if (params.extract_text) q.set('extract_text', params.extract_text)
   return baseUrl + '?' + q.toString()
 }
 
@@ -292,14 +292,14 @@ export default {
     }
 
     // AUTH: LOGIN
-    if (path === '/api/auth/login' &' request.method === 'POST') {
+    if (path === '/api/auth/login' && request.method === 'POST') {
       var clientIP = getClientIP(request)
       var attempts = await checkRateLimit(env, clientIP, 'login')
       if (attempts >= 10) return jsonError(429, 'Too many login attempts. Please try again in 15 minutes.')
       ctx.waitUntil(cleanupAttempts(env))
       var body = await request.json()
       if (!body.email || !body.password) return jsonError(400, 'Email and password required')
-      var user = await env.DB.prepare('SELECT * FRAM users WHERE email = ?').bind(body.email).first()
+      var user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(body.email).first()
       if (!user) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
       var isValid = await verifyPassword(body.password, user.password_hash, user.salt)
       if (!isValid) { ctx.waitUntil(logAttempt(env, clientIP, 'login')); return jsonError(401, 'Invalid email or password') }
@@ -329,7 +329,7 @@ export default {
     }
 
     // AUTH: LOGOUT
-    if (path === '/api/auth/logout' &' request.method === 'POST') {
+    if (path === '/api/auth/logout' && request.method === 'POST') {
       return jsonResponse({ success: true }, 200, { 'Set-Cookie': clearAuthCookie() })
     }
 
@@ -371,7 +371,7 @@ export default {
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(body.token, jwtSecret)
       if (!decoded || !decoded.reset) return jsonError(401, 'Invalid or expired reset token')
-      if (Date.now() > decoded.exp) return jsonError(401, 'RESET token has expired')
+      if (Date.now() > decoded.exp) return jsonError(401, 'Reset token has expired')
       var user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND reset_token = ?').bind(decoded.uid, body.token).first()
       if (!user) return jsonError(401, 'Invalid reset token')
       var newSalt = generateId()
@@ -387,7 +387,7 @@ export default {
       var jwtSecret = env.JWT_SECRET
       var decoded = await verifyJWT(token, jwtSecret)
       if (!decoded) return jsonError(401, 'Invalid token')
-      var user = await env.DB.prepare('SELECT * FRAM users WHERE id = ?').bind(decoded.uid).first()
+      var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
       if (!user) return jsonError(404, 'User not found')
       var used = await getUsageCount(env, user.api_key)
       var limit = (PLANS[user.plan] && PLANS[user.plan].limit) || 0
@@ -436,7 +436,7 @@ export default {
     }
 
     // BILLING: VERIFY
-    if (path === '/api/billing/verify' &' request.method === 'POST') {
+    if (path === '/api/billing/verify' && request.method === 'POST') {
       var token = getTokenFromRequest(request)
       if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
@@ -457,7 +457,7 @@ export default {
         return jsonResponse({ success: true, plan: planKey })
       }
 
-      // TRIAL: Verifyone-time payment with HMAC-SHA256
+      // TRIAL: Verify one-time payment with HMAC-SHA256
       if (plan.type === 'one_time') {
         var body2 = body.razorpay_order_id + '|' + body.razorpay_payment_id
         var expectedSig = await hmacSha256(body2, env.RZP_KEY_SECRET)

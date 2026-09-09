@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigation, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 
@@ -24,9 +24,11 @@ const PLAN_LIMITS = {
 export default function Dashboard() {
   const { user, logout, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [stats, setStats] = useState({ used: 0, limit: 0, plan: 'none' })
   const [recent, setRecent] = useState([])
   const [copied, setCopied] = useState(false)
+  const [newKey, setNewKey] = useState(null)
   const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) {
       fetch(`${API_URL}/api/usage`, {
-        headers: { 'Authorization': 'Bearer ' + user.token }
+        credentials: 'include'
       })
         .then(r => r.json())
         .then(data => {
@@ -48,7 +50,7 @@ export default function Dashboard() {
   }, [user])
 
   function copyKey() {
-    navigator.clipboard.writeText(user?.api_key || '')
+    navigator.clipboard.writeText(newKey || user?.api_key || '')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -57,12 +59,13 @@ export default function Dashboard() {
     if (!confirm('Are you sure? Your old API key will stop working immediately.')) return
     fetch(`${API_URL}/api/auth/regenerate`, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + user.token }
+      credentials: 'include'
     })
       .then(r => r.json())
       .then(data => {
         if (data.api_key) {
-          window.location.reload()
+          setNewKey(data.api_key)
+          setCopied(false)
         }
       })
   }
@@ -181,15 +184,25 @@ export default function Dashboard() {
               )}
 
               <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>Your API Key</h3>
+              {location.state?.newApiKey && !newKey && (
+                <div style={{ marginBottom: '12px', padding: '12px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '8px', fontSize: '14px' }}>
+                  <strong>Save this key now!</strong> It will not be shown again: <code style={{ wordBreak: 'break-all' }}>{location.state.newApiKey}</code>
+                </div>
+              )}
               <div className="api-key-card">
                 <div className="api-key-label">API Key</div>
                 <div className="api-key-value">
-                  <code>{user.api_key}</code>
+                  <code>{newKey || user.api_key_display || 'sk_live_...'}</code>
                   <button className="btn btn-outline btn-sm" onClick={copyKey}>{copied ? 'Copied!' : 'Copy'}</button>
                 </div>
                 <button className="btn btn-danger btn-sm" style={{ marginTop: '12px' }} onClick={regenerateKey}>
                   Regenerate Key
                 </button>
+                {newKey && (
+                  <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '8px', fontSize: '14px' }}>
+                    <strong>Save this key now!</strong> It will not be shown again: <code style={{ wordBreak: 'break-all' }}>{newKey}</code>
+                  </div>
+                )}
               </div>
 
               <h3 style={{ marginBottom: '12px', fontSize: '18px', marginTop: '28px' }}>Recent Screenshots</h3>

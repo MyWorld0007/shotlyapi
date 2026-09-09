@@ -8,37 +8,32 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('shotly_token')
-    if (token) {
-      fetch(`${API_URL}/api/auth/me`, {
-        headers: { 'Authorization': 'Bearer ' + token }
+    fetch(`${API_URL}/api/auth/me`, {
+      credentials: 'include'
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          setUser(data)
+        }
       })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data) {
-            setUser({ ...data, token })
-          } else {
-            localStorage.removeItem('shotly_token')
-          }
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false))
-    } else {
-      setLoading(false)
-    }
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
-  function login(token) {
-    localStorage.setItem('shotly_token', token)
+  function login() {
     return fetch(`${API_URL}/api/auth/me`, {
-      headers: { 'Authorization': 'Bearer ' + token }
+      credentials: 'include'
     })
       .then(r => r.json())
-      .then(data => setUser({ ...data, token }))
+      .then(data => setUser(data))
   }
 
   function logout() {
-    localStorage.removeItem('shotly_token')
+    fetch(`${API_URL}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    }).catch(() => {})
     setUser(null)
   }
 

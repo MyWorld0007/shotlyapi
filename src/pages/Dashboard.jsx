@@ -50,7 +50,7 @@ export default function Dashboard() {
   }, [user])
 
   function copyKey() {
-    navigator.clipboard.writeText(newKey || user?.api_key || '')
+    navigator.clipboard.writeText(newKey || user?.api_key_display || user?.api_key || '')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -63,6 +63,10 @@ export default function Dashboard() {
     })
       .then(r => r.json())
       .then(data => {
+        if (data.error) {
+          alert(data.error)
+          return
+        }
         if (data.api_key) {
           setNewKey(data.api_key)
           setCopied(false)
@@ -219,7 +223,7 @@ export default function Dashboard() {
                   <tbody>
                     {recent.map((r, i) => (
                       <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={{ padding: '8px', fontSize: '14px', fontFamily: 'var(--mono)' }}>{r.url}</td>
+                        <td style={{ padding: '8)Ä', fontSize: '14px', fontFamily: 'var(--mono)' }}>{r.url}</td>
                         <td style={{ padding: '8px', fontSize: '14px', color: 'var(--text-dim)' }}>{r.timestamp}</td>
                       </tr>
                     ))}

@@ -50,7 +50,7 @@ export default function Dashboard() {
   }, [user])
 
   function copyKey() {
-    navigator.clipboard.writeText(newKey || user?.api_key_display || user?.api_key || '')
+    navigator.clipboard.writeText(newKey || user?.api_key || user?.api_key_display || '')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -170,7 +170,7 @@ export default function Dashboard() {
                   {hasPlan ? (
                     <div className="sub"><Link to="/billing">Upgrade plan</Link></div>
                   ) : (
-                    <div className="sub"><Link to="/billing">Buy a plan</Link></div>
+                    <div className="sub"><Link to="/billing">Buy a Plan</Link></div>
                   )}
                 </div>
                 <div className="usage-card">
@@ -190,7 +190,7 @@ export default function Dashboard() {
                   marginBottom: '24px',
                   fontSize: '14px'
                 }}>
-                  <strong>Trial active</strong> â Expires on {stats.trial_expires_at}. 
+                  <strong>Trial active</strong> Ã¢ÂÂ Expires on {stats.trial_expires_at}. 
                   You have {planLimit - stats.used} screenshots remaining.
                 </div>
               )}
@@ -204,8 +204,9 @@ export default function Dashboard() {
               <div className="api-key-card">
                 <div className="api-key-label">API Key</div>
                 <div className="api-key-value">
-                  <code>{newKey || user.api_key_display || 'sk_live_...'}</code>
-                  <button className="btn btn-outline btn-sm" onClick={copyKey}>{copied ? 'Copied!' : 'Copy'}</button>
+                  <code>{newKey || user.api_key || user.api_key_display || 'sk_live_...'}</code>
+                </div>
+                <button className="btn btn-outline btn-sm" onClick={copyKey}>{copied ? 'Copied!' : 'Copy'}</button>
                 </div>
                 <button className="btn btn-danger btn-sm" style={{ marginTop: '12px' }} onClick={regenerateKey}>
                   Regenerate Key
@@ -231,7 +232,7 @@ export default function Dashboard() {
                   <tbody>
                     {recent.map((r, i) => (
                       <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={{ padding: '8)Ä', fontSize: '14px', fontFamily: 'var(--mono)' }}>{r.url}</td>
+                        <td style={{ padding: '8)Ã', fontSize: '14px', fontFamily: 'var(--mono)' }}>{r.url}</td>
                         <td style={{ padding: '8px', fontSize: '14px', color: 'var(--text-dim)' }}>{r.timestamp}</td>
                       </tr>
                     ))}

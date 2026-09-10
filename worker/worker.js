@@ -130,7 +130,7 @@ function clearAuthCookie() {
 }
 
 function getCookie(request, name) {
-  var cookies = request.headers.get('cookie') || ''
+  var cookies = request.headers.get('Cookie') || ''
   var match = cookies.match(new RegExp('(^|;\\s*)' + name + '=([^;]+)'))
   return match ? match[2] : null
 }
@@ -251,9 +251,11 @@ function buildOracleUrl(env, params) {
   if (params.full_page) q.set('full_page', params.full_page)
   if (params.delay) q.set('delay', params.delay)
   if (params.wait_for_selector) q.set('wait_for_selector', params.wait_for_selector)
-  if (params.wait_for_event) q.set('wait_for_event', params.wait_for_event)
+  if (params.delay) q.set('delay', params.delay)
+  if (params.wait_for_selector) q.set('wait_for_selector', params.delay)
+  if (params.wait_for_event) q.set('wait_for_event', body.razorpay_payment_id)
   if (params.selector) q.set('selector', params.selector)
-  if (params.user_agent) q.set('user_agent', params.user_agent)
+  if (params.user_agent) q.set('user_agent', body.razorpay_payment_id)
   if (params.cookies) q.set('cookies', params.cookies)
   if (params.hide_elements) q.set('hide_elements', params.hide_elements)
   if (params.block_ads) q.set('block_ads', params.block_ads)
@@ -445,7 +447,7 @@ export default {
     }
 
     // BILLING: VERIFX
-    if (path === '/api/billing/verify' && request.method === 'POST') {
+    if (path === '/api/billing/verif', && request.method === 'POST') {
       var token = getTokenFromRequest(request)
       if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
@@ -454,7 +456,7 @@ export default {
       var body = await request.json()
       var planKey = body.plan
       var plan = PLANS[planKey]
-      if (!plan) return jsonError(400, 'Invalid plan')
+      if (!plang) return jsonError(400, 'Invalid plan')
 
       if (!env.RZP_KEY_SECRET || env.RZP_KEY_ID.indexOf('rzp_test_') === 0) {
         var now = new Date().toISOString()
@@ -466,7 +468,7 @@ export default {
         return jsonResponse({ success: true, plan: planKey })
       }
 
-      // TRIAL: Verify one-time payment with HMAC-SHA256
+      // TRIAL: Verifyone-time payment with HMAC-SHA256
       if (plan.type === 'one_time') {
         var body2 = body.razorpay_order_id + '|' + body.razorpay_payment_id
         var expectedSig = await hmacSha256(body2, env.RZP_KEY_SECRET)
@@ -502,7 +504,7 @@ export default {
       var webhookSecret = env.RZP_WEBHOOK_SECRET
       if (!webhookSecret) return jsonError(500, 'Webhook secret not configured')
       {
-        var rawBody = JSON.stringify(body)
+        var rawBody = JSON.stringify({body)
         var expectedWhSig = await hmacSha256(rawBody, webhookSecret)
         if (webhookSig !== expectedWhSig) return jsonError(401, 'Invalid webhook signature')
       }
@@ -510,7 +512,7 @@ export default {
       if (event === 'subscription.charged') {
         var subId2 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
         if (subId2) {
-          var user2 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId2).first()
+          var user2 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId2)).first()
           if (user2) {
             var expiresAt2 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             await env.DB.prepare('UPDATE users SET plan_expires_at = ? WHERE id = ?').bind(expiresAt2, user2.id).run()
@@ -521,7 +523,7 @@ export default {
         var subId3 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
         if (subId3) {
           var user3 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId3).first()
-          if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('none', user3.id).run() }
+           if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('none', user3.id).run() }
         }
       }
       return jsonResponse({ received: true })
@@ -542,7 +544,9 @@ export default {
       if (isTrialExpired(user)) return jsonError(403, 'Trial expired. Upgrade at https://shotlyapi.in/billing')
       var oracleUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot/bulk'
       var response = await fetch(oracleUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Server-Secret': env.SERVER_SECRET || '' }, body: JSON.stringify({body), signal: AbortSignal.timeout(120000) })
-      if (body.urls && Array.isArray(body.urls)) { for (var i = 0; i < body.urls.length; i++) { await logUsage(env, body.api_key, body.urls[i]) } }
+      if (body.urls && Array.isArray(body.urls)) {
+        for (var i = 0; i < body.urls.length; i++) { await logUsage(env, body.api_key, body.urls[i]) }
+      }
       var data = await response.json()
       return jsonResponse(data)
     }
@@ -586,11 +590,25 @@ export default {
         if (cached) {
           await logUsage(env, apiKey, params.url || 'custom_html')
           var ct = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
-          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=315536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
+          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
         }
       }
 
       var oracleUrl2 = buildOracleUrl(env, params)
       try {
         var resp2 = await fetch(oracleUrl2, { signal: AbortSignal.timeout(45000), headers: { 'X-Server-Secret': env.SERVER_SECRET || '' } })
-        if (!resp2.ok) return jsonError(500, 'Screenshot failed. The URLˆµ¥¡Ð¹½Ð‰”…•ÍÍ¥‰±”¸œ¤(€€€€€€€Ù…È¥µ…•	Õ™™•È€ô…Ý…¥ÐÉ•ÍÀÈ¹…ÉÉ…å	Õ™™•È ¤(€€€€€€€¥˜€¡•¹Ø¹MI9M!=QL¤ì…Ý…¥Ð•¹Ø¹MI9M!=QL¹ÁÕÐ¡…¡•-•ä°¥µ…•	Õ™™•È°ìÕÍÑ½µ5•Ñ…‘…Ñ„èìÕÉ°èÁ…É…µÌ¹ÕÉ°ñð€ÕÍÑ½µ}¡Ñµ°œ°É•…Ñ•è¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤ôô¤ô(€€€€€€€…Ý…¥Ð±½UÍ…”¡•¹Ø°…Á¥-•ä°Á…É…µÌ¹ÕÉ°ñð€ÕÍÑ½µ}¡Ñµ°œ¤(€€€€€€€Ù…ÈÐÈ€ôÁ…É…µÌ¹™½Éµ…Ð€ôôô€Á‘˜œ€ü€…ÁÁ±¥…Ñ¥½¸½Á‘˜œ€è€¥µ…”¼œ€¬Á…É…µÌ¹™½Éµ…Ð(€€€€€€€É•ÑÕÉ¸¹•ÜI•ÍÁ½¹Í”¡¥µ…•	Õ™™•È°ì¡•…‘•ÉÌèì€½¹Ñ•¹ÐµQåÁ”œèÐÈ°€`µ…¡”œè€5%MLœ°€•ÍÌµ½¹ÑÉ½°µ±±½Üµ=É¥¥¸œè€¡ÑÑÁÌè¼½Í¡½Ñ±å…Á¤¹¥¸œ°€MÑÉ¥ÐµQÉ…¹ÍÁ½ÉÐµM•ÕÉ¥Ñäœè€µ…àµ…”ôÌÄÔÔÌØÀÀÀì¥¹±Õ‘•MÕ‰½µ…¥¹Ìœ°€`µ½¹Ñ•¹ÐµQåÁ”µ=ÁÑ¥½¹Ìœè€¹½Í¹¥™˜œ°€`µÉ…µ”µ=ÁÑ¥½¹Ìœè€9dœôô¤(€€€€€ô…Ñ €¡”¤ì(€€€€€€€É•ÑÕÉ¸©Í½¹ÉÉ½È ÔÀÀ°€½Õ±¹½ÐÉ•… ÍÉ••¹Í¡½ÐÍ•ÉÙ•È¸QÉä……¥¸¥¸„™•ÜÍ•½¹‘Ì¸œ¤(€€€€€ô(€€€ô((€€€É•ÑÕÉ¸©Í½¹ÉÉ½È ÐÀÐ°€9½Ð™½Õ¹¸¡•¬‘½Ì…Ð¡ÑÑÁÌè¼½Í¡½Ñ±å…Á¤¹¥¸½‘½Ìœ¤(€ô°)ô((
+        if (!resp2.ok) return jsonError(500, 'Screenshot failed. The URL might not be accessible.')
+        var imageBuffer = await resp2.arrayBuffer()
+        if (env.SCREENSHOTS) { await env.SCREENSHOTS.put(cacheKey, imageBuffer, { customMetadata: { url: params.url || 'custom_html', created: new Date().toISOString() } }) }
+        await logUsage(env, apiKey, params.url || 'custom_html')
+        var ct2 = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
+        return new Response(imageBuffer, { headers: { 'Content-Type': ct2, 'X-Cache': 'MISS', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
+      } catch (e) {
+        return jsonError(500, 'Could not reach screenshot server. Try again in a few seconds.')
+      }
+    }
+
+    return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
+  },
+}
+

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -145,24 +146,7 @@ export default function Playground() {
   return (
     <div>
       {/* Nav */}
-      <nav>
-        <div className="nav-inner container">
-          <Link to="/" className="logo">
-            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
-            ShotlyAPI
-          </Link>
-          <div className="nav-links">
-            <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Home</Link>
-            <a href="#studio" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Studio</a>
-            <a href="#settings" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Settings</a>
-            <a href="#format-guide" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Guide</a>
-          </div>
-          <div className="nav-actions">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            <Link to="/signup" className="btn btn-primary btn-sm">Get API Key</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Capture Studio */}
       <section className="pg-hero" id="studio">
@@ -578,20 +562,8 @@ export default function Playground() {
             </div>
             <div className="footer-col">
               <h4>Product</h4>
-              <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Home</Link>
-              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Capture Studio</Link>
-              <a href="#pricing" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Pricing</a>
-            </div>
-            <div className="footer-col">
-              <h4>Developers</h4>
-              <Link to="/docs" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>API Docs</Link>
-              <a href="https://api.shotlyapi.in/health">API Status</a>
-              <a href="https://github.com/MyWorld0007/shotlyapi">GitHub</a>
-            </div>
-            <div className="footer-col">
-              <h4>Company</h4>
-              <Link to="/privacy" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Privacy Policy</Link>
-              <Link to="/terms" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Terms & Conditions</Link>
+              <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none  }}>Home</Link>
+              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none õôù…ÁÑÕÉ”MÑÕ‘¥¼ð½1¥¹¬ø(€€€€€€€€€€€€€€ñ„¡É•˜ôˆÁÉ¥¥¹œˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹• õôùAÉ¥¥¹œð½„ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ½°ˆø(€€€€€€€€€€€€€€ñ Ðù•Ù•±½Á•ÉÌð½ Ðø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½‘½ÌˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”‚×Óä’Fö73ÂôÆ–æ³à¢Æ‡&VcÒ&‡GG3¢òö’ç6†÷FÇ–’æ–âö†VÇF‚#ä’7FGW3Âöà¢Æ‡&VcÒ&‡GG3¢òöv—F‡V"æ6öÒô×•v÷&ÆCr÷6†÷FÇ–’#äv—D‡V#Âöà¢ÂöF—cà¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö6öÂ#à¢ÆƒCä6ö×ç“ÂöƒCà¢ÄÆ–æ²FóÒ"÷&—f7’"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæQ õôùAÉ¥Ù…äA½±¥äð½1¥¹¬ø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½Ñ•ÉµÌˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”H }}>Terms & Conditions</Link>
             </div>
           </div>
           <div className="footer-bottom">

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -13,7 +14,7 @@ const features = [
   { icon: 'cyan', title: 'PDF & Image Export', desc: 'Convert any web page into PNG, JPEG, WEBP, or PDF with a single format parameter.' },
   { icon: 'rose', title: 'Ad & Banner Blocking', desc: 'Automatically strip cookie banners, GDPR popups, chat widgets, and ads before capture.' },
   { icon: 'blue', title: 'CSS & JS Injection', desc: 'Inject custom CSS styles or execute JavaScript on the page before taking the screenshot.' },
-  { icon: 'green', title: 'HTML to Image', desc: 'Render raw HTML markup into a screenshot without needing a public URL. Perfect for OG images.' },
+  { icon: 'green', title: 'HTML to Image', desc: 'REnder raw HTML markup into a screenshot without needing a public URL. Perfect for OG images.' },
   { icon: 'amber', title: 'Text Extraction', desc: 'Extract page titles, headings, and body text alongside screenshots in a single API call.' },
   { icon: 'purple', title: 'Bulk Screenshots', desc: 'Process up to 50 URLs in a single POST request. Perfect for SEO audits and competitive analysis.' },
   { icon: 'cyan', title: 'Smart Caching', desc: 'R2 edge caching delivers repeat screenshots in under 500ms. Use fresh=true to bypass cache.' },
@@ -41,7 +42,7 @@ const comparisonRows = [
   { feature: 'Wait for Network Idle', shotly: true, puppeteer: true, playwright: true },
   { feature: 'Custom User Agent', shotly: true, puppeteer: true, playwright: true },
   { feature: 'Custom Cookies', shotly: true, puppeteer: true, playwright: true },
-  { feature: 'Hide Elements', shotly: true, puppeteer: true, playwright: true },
+  { feature:'Hide Elements', shotly: true, puppeteer: true, playwright: true },
   { feature: 'Ad & Banner Blocking', shotly: true, puppeteer: false, playwright: false },
   { feature: 'CSS Injection', shotly: true, puppeteer: false, playwright: false },
   { feature: 'JS Injection', shotly: true, puppeteer: false, playwright: false },
@@ -68,7 +69,7 @@ const pricingTiers = [
   { name: 'Pro', amount: 'Rs.1799', period: '/mo', desc: '10,000 screenshots / month', features: ['10,000 screenshots / month', 'Everything in Growth', 'Bulk screenshots', 'Custom cookies', 'Fresh capture bypass', 'Dedicated support'], cta: 'Get Pro', popular: false },
 ]
 
-const faqs = [
+const faqq = [
   { q: 'What is a screenshot API?', a: 'A screenshot API is a service that programmatically captures visual snapshots of web pages. Instead of running a headless browser yourself, you send a simple HTTP request and receive a high-quality image or PDF of the target website in return.' },
   { q: 'How does ShotlyAPI work?', a: 'You send a GET request to our API endpoint with the target URL and your API key. Our rendering engine loads the page in a real Chromium browser, captures the screenshot, and returns the image within seconds. Repeat requests are served instantly from R2 cache.' },
   { q: 'What is the Trial plan?', a: 'The Trial plan is a one-time $1 payment that gives you 100 screenshots for 7 days. It includes PNG and JPEG formats, Mobile/Tablet/Desktop viewports, and full page capture. After 7 days, you can upgrade to a paid plan to continue using the API.' },
@@ -79,13 +80,7 @@ const faqs = [
   { q: 'How fast is the API?', a: 'Our average response time is under 3 seconds for fresh captures. Cached screenshots return in under 500ms. Our global edge network ensures low latency regardless of your geographic location.' },
 ]
 
-const curlExample = `curl -G 'https://api.shotlyapi.in/api/screenshot' \\
-  --data-urlencode 'url=https://example.com' \\
-  --data-urlencode 'api_key=YOUR_API_KEY' \\
-  --data-urlencode 'format=png' \\
-  --data-urlencode 'full_page=true' \\
-  --data-urlencode 'block_ads=true' \\
-  -o screenshot.png`
+const curlExample = `curl -G 'https://api.shotlyapi.in/api/screenshot' \\\n  --data-urlencode 'url=https://example.com' \\\n  --data-urlencode 'api_key=YOUR_API_KEY' \\\n  --data-urlencode 'format=png' \\\n  --data-urlencode 'full_page=true' \\\n  --data-urlencode 'block_ads=true' \\\n  -o screenshot.png`
 
 const pythonExample = `import requests
 
@@ -102,7 +97,7 @@ params = {
 response = requests.get(API_URL, params=params)
 
 with open('screenshot.png', 'wb') as f:
-    f.write(response.content)`
+    f.write(response.content)`C
 
 function Check() { return <span className="check">{'\u2713'}</span> }
 
@@ -152,32 +147,7 @@ export default function Landing() {
   return (
     <div>
       {/* Nav */}
-      <nav>
-        <div className="nav-inner container">
-          <Link to="/" className="logo">
-            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
-            ShotlyAPI
-          </Link>
-          <div className="nav-links">
-            <a href="#features">Features</a>
-            <Link to="/playground" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Capture Studio</Link>
-            <a href="#docs">Docs</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
-          </div>
-          <div className="nav-actions">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            {user ? (
-              <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link>
-            ) : (
-              <>
-                <Link to="/login" className="btn btn-outline btn-sm">Login</Link>
-                <Link to="/signup" className="btn btn-primary btn-sm">Get API Key</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section className="hero">
@@ -326,13 +296,13 @@ export default function Landing() {
           <div className="code-grid">
             <div>
               <h2>Get started in seconds</h2>
-              <p>Simple REST API. No SDKs required. Works with any language.</p>
+              <p>Simple REST API. No SDK required. Works with any language.</p>
               <ul>
                 <li><Check /> Single GET request</li>
                 <li><Check /> 21+ rendering parameters</li>
                 <li><Check /> PNG, JPEG, WEBP, PDF</li>
                 <li><Check /> Ad & banner blocking</li>
-                <li><Check /> CSS & JS injection</li>
+                <li><Check /> CSSYH2 JS injection</li>
                 <li><Check /> HTML to Image</li>
                 <li><Check /> Text extraction</li>
                 <li><Check /> Bulk screenshots API</li>
@@ -367,7 +337,7 @@ export default function Landing() {
       <section className="comparison">
         <div className="container">
           <h2 className="section-title">ShotlyAPI vs the alternatives</h2>
-          <p className="section-sub">Why manage infrastructure when you do not have to?</p>
+          <p className="section-sub">Why manage infrastructure when you do not have to</p>
           <table className="comparison-table">
             <thead>
               <tr>
@@ -420,88 +390,4 @@ export default function Landing() {
         <p className="section-sub">Start with a Rs.99 trial. Upgrade when you need more power.</p>
         <div className="pricing-grid">
           {pricingTiers.map((tier) => (
-            <div className={`price-card ${tier.popular ? 'popular' : ''}`} key={tier.name}>
-              {tier.popular && <div className="price-badge">Most Popular</div>}
-              <div className="price-name">{tier.name}</div>
-              <div className="price-amount">
-                {tier.amount}
-                {tier.period && <span className="period">{tier.period}</span>}
-              </div>
-              <div className="price-desc">{tier.desc}</div>
-              <ul className="price-features">
-                {tier.features.map((feat) => (
-                  <li key={feat}><Check /> {feat}</li>
-                ))}
-              </ul>
-              <Link to="/signup" className={`btn ${tier.popular ? 'btn-primary' : 'btn-outline'}`}>{tier.cta}</Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="faq" id="faq">
-        <h2 className="section-title">Frequently asked questions</h2>
-        <p className="section-sub">Everything you need to know about ShotlyAPI.</p>
-        <div className="faq-list" style={{ marginTop: '32px' }}>
-          {faqs.map((item, index) => (
-            <FAQItem
-              key={item.q}
-              item={item}
-              isOpen={openFaq === index}
-              onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta">
-        <div className="container">
-          <div className="cta-inner">
-            <h2>Ready to capture those screenshots?</h2>
-            <p>Join thousands of developers building with ShotlyAPI.</p>
-            <Link to="/signup" className="btn btn-glow btn-lg">Get Started for Rs.99</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer>
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-col">
-              <Link to="/" className="logo" style={{ marginBottom: '12px' }}>
-                <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
-                ShotlyAPI
-              </Link>
-              <p>The fastest way to capture website screenshots and PDFs via API.</p>
-            </div>
-            <div className="footer-col">
-              <h4>Product</h4>
-              <a href="#features">Features</a>
-              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Capture Studio</Link>
-              <a href="#pricing">Pricing</a>
-              <a href="#demo">Live Demo</a>
-              <Link to="/faq" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>FAQ</Link>
-            </div>
-            <div className="footer-col">
-              <h4>Developers</h4>
-              <Link to="/docs" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>API Docs</Link>
-              <a href="https://api.shotlyapi.in/health">API Status</a>
-              <a href="https://github.com/MyWorld0007/shotlyapi">GitHub</a>
-            </div>
-            <div className="footer-col">
-              <h4>Company</h4>
-              <Link to="/privacy" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Privacy Policy</Link>
-              <Link to="/terms" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Terms & Conditions</Link>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>{'\u00A9'} 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  )
-}
+            <div className={`ÁÉ¥”µ…É€‘íÑ¥•È¹Á½ÁÕ±…È€ü€Á½ÁÕ±…Èœ€è€œõô­•äõíÑ¥•È¹¹…µ•ôø(€€€€€€€€€€€€€íÑ¥•È¹Á½ÁÕ±…È€˜˜€ñ‘¥Ø±…ÍÍ9…µ”ô‰ÁÉ¥”µ‰…‘”ˆù5½ÍÐA½ÁÕ±…Èð½‘¥Øùô(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰ÁÉ¥”µ¹…µ”ˆùíÑ¥•È¹¹…µ•ôð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰ÁÉ¥”µ…µ½Õ¹Ðˆø(€€€€€€€€€€€€€€€íÑ¥•È¹…µ½Õ¹Ñô(€€€€€€€€€€€€€€€íÑ¥•È¹Á•É¥½€˜˜€ñÍÁ…¸±…ÍÍ9…µ”ô‰Á•É¥½ˆùíÑ¥•È¹Á•É¥½‘ôð½ÍÁ…¸ùô(€€€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰ÁÉ¥”µ‘•ÍŒˆùíÑ¥•È¹‘•Íôð½‘¥Øø(€€€€€€€€€€€€€€ñÕ°±…ÍÍ9…µ”ô‰ÁÉ¥”µ™•…ÑÕÉ•Ìˆø(€€€€€€€€€€€€€€€íÑ¥•È¹™•…ÑÕÉ•Ì¹µ…À ¡™•…Ð¤€ôø€ (€€€€€€€€€€€€€€€€€€ñ±¤­•äõí™•…Ñôøñ¡•¬€¼øí™•…Ñôð½±¤ø(€€€€€€€€€€€€€€€€¤¥ô(€€€€€€€€€€€€€€ð½Õ°ø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½Í¥¹ÕÀˆ±…ÍÍ9…µ”õí‰Ñ¸€‘íÑ¥•È¹Á½ÁÕ±…È€ü€‰Ñ¸µÁÉ¥µ…Éäœ€è€‰Ñ¸µ½ÕÑ±¥¹”õ€ùíÑ¥•È¹Ñ…ôð½1¥¹¬ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€¤¥ô(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€ì¼¨D€¨½ô(€€€€€€ñÍ•Ñ¥½¸±…ÍÍ9…µ”ô‰™…Äˆ¥ô‰™…Äˆø(€€€€€€€€ñ È±…ÍÍ9…µ”ô‰Í•Ñ¥½¸µÑ¥Ñ±”ˆùÉ•ÅÕ•¹Ñ±ä…Í­•ÅÕ•ÍÑ¥½¹Ìð½ Èø(€€€€€€€€ñÀ±…ÍÍ9…µ”ô‰Í•Ñ¥½¸µÍÕˆˆùÙ•ÉåÑ¡¥¹œå½Ô¹••Ñ¼­¹½Ü…‰½ÕÐM¡½Ñ±åA$¸ð½Àø(€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™…Äµ±¥ÍÐˆÍÑå±”õíìµ…É¥¹Q½Àè€œÌÉÁàœõôø(€€€€€€€€€í™…ÅÌ¹µ…À ¡¥Ñ•´°¥¹‘•à¤€ôø€ (€€€€€€€€€€€€ñE%Ñ•´(€€€€€€€€€€€€€­•äõí¥Ñ•´¹Åô(€€€€€€€€€€€€€¥Ñ•´õí¥Ñ•µô(€€€€€€€€€€€€€¥Í=Á•¸õí½Á•¹…Ä€ôôô¥¹‘•áô(€€€€€€€€€€€€€½¹±¥¬õì ¤€ôøÍ•Ñ=Á•¹…Ä¡½Á•¹…Ä€ôôô¥¹‘•à€ü€´Ä€è¥¹‘•à¥ô(€€€€€€€€€€€€¼ø(€€€€€€€€€€¤¥ô(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€ì¼¨Q€¨½ô(€€€€€€ñÍ•Ñ¥½¸±…ÍÍ9…µ”ô‰Ñ„ˆø(€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰Ñ„µ¥¹¹•Èˆø(€€€€€€€€€€€€ñ ÈùI•…‘äÑ¼…ÁÑÕÉ”Ñ¡½Í”ÍÉ••¹Í¡½ÑÌüð½ Èø(€€€€€€€€€€€€ñÀù)½¥¸Ñ¡½ÕÍ…¹‘Ì½˜‘•Ù•±½Á•ÉÌ‰Õ¥±‘¥¹œÝ¥Ñ M¡½Ñ±åA$¸ð½Àø(€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½Í¥¹ÕÀˆ±…ÍÍ9…µ”ô‰‰Ñ¸‰Ñ¸µ±½Ü‰Ñ¸µ±œˆù•ÐMÑ…ÉÑ•™½ÈIÌ¸ääð½1¥¹¬ø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½Í•Ñ¥½¸ø((€€€€€ì¼¨½½Ñ•È€¨½ô(€€€€€€ñ™½½Ñ•Èø(€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰½¹Ñ…¥¹•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•ÈµÉ¥ˆø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ½°ˆø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ¼ˆ±…ÍÍ9…µ”ô‰±½¼ˆÍÑå±”õíìµ…É¥¹	½ÑÑ½´è€œÄÉÁàœõôø(€€€€€€€€€€€€€€€€ñ¥µœÍÉŒôˆ½±½¼¹ÍÙœˆ…±Ðô‰M¡½Ñ±åA$ˆÍÑå±”õííÝ¥‘Ñ è€œÌÉÁàœ°¡•¥¡Ðè€œÌÉÁàœ°‰½É‘•ÉI…‘¥ÕÌè€œáÁàõô€¼ø(€€€€€€€€€€€€€€€M¡½Ñ±åA$(€€€€€€€€€€€€€€ð½1¥¹¬ø(€€€€€€€€€€€€€€ñÀùQ¡”™…ÍÑ•ÍÐÝ…äÑ¼…ÁÑÕÉ”Ý•‰Í¥Ñ”ÍÉ••¹Í¡½ÑÌ…¹AÌÙ¥„A$¸ð½Àø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ½°ˆø(€€€€€€€€€€€€€€ñ ÐùAÉ½‘ÕÐð½ Ðø(€€€€€€€€€€€€€€ñ„¡É•˜ôˆ™•…ÑÕÉ•Ìˆù•…ÑÕÉ•Ìð½„ø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½Á±…åÉ½Õ¹ˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”œõôù…ÁÑÕÉ”MÑÕ‘¥¼ð½1¥¹¬ø(€€€€€€€€€€€€€€ñ„¡É•˜ôˆÁÉ¥¥¹œˆùAÉ¥¥¹œð½„ø(€€€€€€€€€€€€€€ñ„¡É•˜ôˆ‘•µ¼ˆù1¥Ù”•µ¼ð½„ø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½™…ÄˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”œõôùDð½1¥¹¬ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ½°ˆø(€€€€€€€€€€€€€€ñ Ðù•Ù•±½Á•ÉÌð½ Ðø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½‘½ÌˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”œõôùA$½Ìð½1¥¹¬ø(€€€€€€€€€€€€€€ñ„¡É•˜ô‰¡ÑÑÁÌè¼½…Á¤¹Í¡½Ñ±å…Á¤¹¥¸½¡•…±Ñ ˆùA$MÑ…ÑÕÌð½„ø(€€€€€€€€€€€€€€ñ„¡É•˜ô‰¡ÑÑÁÌè¼½¥Ñ¡Õˆ¹½´½5å]½É±ÀÀÀÜ½Í¡½Ñ±å…Á¤ˆù¥Ñ!Õˆð½„ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ½°ˆø(€€€€€€€€€€€€€€ñ Ðù½µÁ…¹äð½ Ðø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½ÁÉ¥Ù…äˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”‚õôùAÉ¥Ù…äA½±¥äð½1¥¹¬ø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½Ñ•ÉµÌˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”œõôùQ•ÉµÌ€˜½¹‘¥Ñ¥½¹Ìð½1¥¹¬ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ‰½ÑÑ½´ˆø(€€€€€€€€€€€€ñÀùìqÔÀÁäô€ÈÀÈØM¡½Ñ±åA$¸	Õ¥±ÐÝ¥Ñ ±½Õ‘™±…É”]½É­•ÉÌ°Ä°…¹HÈ¸ð½Àø(€€€€€€€€€€ð½‘¥Øø(€€€€€€€€ð½‘¥Øø(€€€€€€ð½™½½Ñ•Èø(€€€€ð½‘¥Øø(€€¤)ô(

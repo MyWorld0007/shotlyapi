@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 const API_URL = 'https://api.shotlyapi.in'
 
 const PLANS = {
+  free:    { name: 'Free',    price: 0,    limit: 20,     type: 'free' },
   trial:   { name: 'Trial',   price: 99,  limit: 100,   type: 'one_time', duration: '7 days' },
   starter: { name: 'Starter', price: 499, limit: 2000,  type: 'subscription' },
   growth:  { name: 'Growth',  price: 899, limit: 4000,  type: 'subscription' },
@@ -12,6 +13,7 @@ const PLANS = {
 }
 
 const PLAN_FEATURES = {
+  free:    ['PNG format', '1920x1080 resolution', 'Full Page capture', 'Desktop viewport', '20 screenshots total'],
   trial:   ['PNG and JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', '7-day access period'],
   starter: ['PNG and JPEG format', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads'],
   growth:  ['PNG, JPEG and WebP', '1920x1080 resolution', 'Full Page capture', 'Mobile / Tablet / Desktop', 'R2 caching', 'Block Ads', 'CSS / JS injection'],
@@ -158,7 +160,7 @@ export default function Billing() {
 
   if (loading || !user) return React.createElement('div', {className: 'auth-page'}, React.createElement('p', null, 'Loading...'))
 
-  const planEntries = Object.entries(PLANS)
+  const planEntries = Object.entries(PLANS).filter(([key]) => key !== 'free')
 
   return (
     <>

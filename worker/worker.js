@@ -421,8 +421,15 @@ export default {
       var plan = PLANS[planKey]
       if (!plan || planKey === 'free' || planKey === 'none') return jsonError(400, 'Invalid plan')
 
-      if (!env.RZP_KEY_ID || !env.RZP_KEY_SECRET || env.RZP_KEY_ID.indexOf('rzp_test_') === 0) {
-        return jsonResponse({ demo: true, plan: planKey, amount: plan.price * 100, type: plan.type })
+      if (!env.RZP_KEY_SECRET || env.RZP_KEY_ID.indexOf('rzp_test_') === 0) {
+        var demoNow = new Date().toISOString()
+        if (plan.type === 'one_time') {
+          await env.DB.prepare('UPDATE users SET plan = ?, trial_started_at = ? WHERE id = ?').bind(planKey, demoNow, decoded.uid).run()
+        } else {
+          var demoExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          await env.DB.prepare('UPDATE users SET plan = ?, plan_expires_at = ? WHERE id = ?').bind(planKey, demoExpires, decoded.uid).run()
+        }
+        return jsonResponse({ demo: true, plan: planKey, amount: plan.price * 100, type: plan.type, activated: true })
       }
 
       if (plan.type === 'one_time') {
@@ -482,7 +489,10 @@ export default {
         } else {
           return jsonError(400, 'Payment verification failed')
         }
-      }
+      } catch (verifyErr) {
+      return jsonError(500, 'Verify failed: ' + (verifyErr && verifyErr.message ? verifyErr.message : String(verifyErr)))
+       }
+    
 
       // MONTHLY: Verify subscription payment with HMAC-SHA256
       var subId = body.razorpay_subscription_id

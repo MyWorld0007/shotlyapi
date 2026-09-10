@@ -4,77 +4,52 @@ import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
 import Navbar from '../components/Navbar'
 
-const sections = [
-  { id: 'introduction', label: 'Introduction' },
-  { id: 'information', label: 'Information We Collect' },
-  { id: 'usage', label: 'How We Use Information' },
-  { id: 'storage', label: 'Data Storage' },
-  { id: 'cookies', label: 'Cookies' },
-  { id: 'third-party', label: 'Third-Party Services' },
-  { id: 'security', label: 'Data Security' },
-  { id: 'retention', label: 'Data Retention' },
-  { id: 'rights', label: 'Your Rights' },
-  { id: 'contact', label: 'Contact Us' },
-]
-
 export default function PrivacyPolicy() {
   const { user } = useAuth()
   const { theme, toggleTheme } = useTheme()
+
   return (
     <div>
       <Navbar />
 
-      <div className="docs-page">
-        <div className="docs-grid">
-          <div className="docs-sidebar">
-            <h3 style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-mute)', marginBottom: '16px' }}>Contents</h3>
-            {sections.map(s => <a key={s.id} href={'#' + s.id}>{s.label}</a>)}
-          </div>
-          <div className="docs-content">
-            <h2>Privacy Policy</h2>
-            <p className="updated">Effective date: September 4, 2026</p>
+      <div className="legal-page">
+        <div className="container">
+          <div className="legal-content">
+            <h1>Privacy Policy</h1>
+            <p className="legal-updated">Last updated: September 10, 2026</p>
 
-            <h3 id="introduction">Introduction</h3>
-            <p>This Privacy Policy describes how ShotlyAPI ("we", "us", or "our") collects, uses, and protects your information when you use our website screenshot API service. We are committed to protecting your privacy and being transparent about our data practices.</p>
+            <p>ShotlyAPI ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your data when you use our screenshot API service.</p>
 
-            <h3 id="information">Information We Collect</h3>
-            <p>We collect the following types of information:</p>
+            <h3 id="data-collection">Data We Collect</h3>
+            <p>We collect and process the following data to provide our service:</p>
             <ul>
-              <li><strong>Account information:</strong> Your email address and password (stored as a salted SHA-256 hash) when you create an account.</li>
-              <li><strong>API usage data:</strong> URLs you request screenshots of, timestamps, and request counts. We log these for billing and usage analytics.</li>
-              <li><strong>Payment information:</strong> Processed securely through Razorpay. We do not store your card details or banking information. Razorpay handles all payment data.</li>
-              <li><strong>Technical data:</strong> IP address, browser type, and access times for security and abuse prevention.</li>
+              <li><strong>Account Data:</strong> Email address, password (hashed), and account preferences</li>
+              <li><strong>Usage Data:</strong> API requests, screenshot counts, timestamps, and error logs</li>
+              <li><strong>Payment Data:</strong> Payment status and plan information (card details are handled by Razorpay, never stored by us)</li>
+              <li><strong>Technical Data:</strong> IP address, browser type, and access logs for security and debugging</li>
             </ul>
 
-            <h3 id="usage">How We Use Information</h3>
-            <p>We use your information to:</p>
+            <h3 id="data-use">How We Use Your Data</h3>
+            <p>We use your data solely to:</p>
             <ul>
-              <li>Authenticate your account and manage API keys</li>
-              <li>Track usage against your plan limits (free, starter, growth, pro)</li>
-              <li>Process payments and manage billing</li>
-              <li>Send transactional emails (welcome, password reset, usage alerts)</li>
-              <li>Monitor for abuse, fraud, and security threats</li>
-              <li>Improve our service and develop new features</li>
+              <li>Provide and maintain the screenshot API service</li>
+              <li>Authenticate your requests and manage your account</li>
+              <li>Process payments and manage subscriptions</li>
+              <li>Monitor usage to prevent abuse and ensure fair usage</li>
+              <li>Send essential service notifications (security alerts, payment confirmations)</li>
+              <li>Respond to your support requests</li>
             </ul>
+            <p>We do not sell, rent, or share your data with third parties for marketing purposes.</p>
 
-            <h3 id="storage">Data Storage</h3>
-            <p>Your data is stored on Cloudflare infrastructure:</p>
-            <ul>
-              <li><strong>Cloudflare D1 (SQLite):</strong> User accounts, API keys, usage logs, and billing records</li>
-              <li><strong>Cloudflare R2:</strong> Cached screenshot images (stored with a URL hash, not linked to your identity)</li>
-              <li><strong>Cloudflare Workers:</strong> API request processing and authentication</li>
-            </ul>
-            <p>All data is stored encrypted at-rest with Cloudflare built-in encryption. Your password is never stored in plain text. We use SHA-256 hashing with a unique salt per user.</p>
-
-            <h3 id="cookies">Cookies</h3>
+            <h3 id="cookies">Cookies and Local Storage</h3>
             <p>We use a minimal cookie approach. Your JWT authentication token is stored in localStorage (not a cookie) for session management. We do not use third-party tracking cookies, advertising cookies, or analytics cookies.</p>
 
             <h3 id="third-party">Third-Party Services</h3>
             <p>We use the following third-party services that may process your data:</p>
             <ul>
-              <li><strong>Cloudflare:</strong> Hosting, database (D1), object storage (R2), and edge compute (Workers),/li>
+              <li><strong>Cloudflare:</strong> Hosting, database (D1), object storage (R2), and edge compute (Workers)</li>
               <li><strong>Razorpay:</strong> Payment processing. Razorpay collects and processes payment data under their own privacy policy.</li>
-              <li><strong>Resend:</strong> Transactional email delivery (welcome emails, password resets),/li>
+              <li><strong>Resend:</strong> Transactional email delivery (welcome emails, password resets)</li>
               <li><strong>Oracle Cloud:</strong> Screenshot rendering server running Chromium</li>
             </ul>
 

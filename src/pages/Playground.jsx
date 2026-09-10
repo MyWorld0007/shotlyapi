@@ -50,7 +50,7 @@ const steps = [
   { num: '1', title: 'You send a request', desc: 'Call the API with a target URL and the parameters you want. Viewport, file type, output mode, and any advanced options like full page or ad blocking.' },
   { num: '2', title: 'A headless browser renders the page', desc: 'The target page is loaded in a real Chromium browser at the requested viewport size, so the capture reflects what a visitor would actually see, including JavaScript-rendered content.' },
   { num: '3', title: 'Optional cleanup is applied', desc: 'If enabled, cookie banners and ad placements are removed, custom CSS/JS is injected, and the page is prepared for capture so it reflects the actual content.' },
-  { num: '4', title: 'You get the result back', desc: 'The response is returned as either the image/PDF file directly, or as JSON containing a hosted URL and metadata. Ready to store, display, or pass into another stepof your pipeline.' },
+  { num: '4', title: 'You get the result back', desc: 'The response is returned as either the image/PDF file directly, or as JSON containing a hosted URL and metadata. Ready to store, display, or pass into another step of your pipeline.' },
 ]
 
 export default function Playground() {
@@ -562,8 +562,20 @@ export default function Playground() {
             </div>
             <div className="footer-col">
               <h4>Product</h4>
-              <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none  }}>Home</Link>
-              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none õôù…ÁÑÕÉ”MÑÕ‘¥¼ð½1¥¹¬ø(€€€€€€€€€€€€€€ñ„¡É•˜ôˆÁÉ¥¥¹œˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹• õôùAÉ¥¥¹œð½„ø(€€€€€€€€€€€€ð½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰™½½Ñ•Èµ½°ˆø(€€€€€€€€€€€€€€ñ Ðù•Ù•±½Á•ÉÌð½ Ðø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½‘½ÌˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”‚×Óä’Fö73ÂôÆ–æ³à¢Æ‡&VcÒ&‡GG3¢òö’ç6†÷FÇ–’æ–âö†VÇF‚#ä’7FGW3Âöà¢Æ‡&VcÒ&‡GG3¢òöv—F‡V"æ6öÒô×•v÷&ÆCr÷6†÷FÇ–’#äv—D‡V#Âöà¢ÂöF—cà¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö6öÂ#à¢ÆƒCä6ö×ç“ÂöƒCà¢ÄÆ–æ²FóÒ"÷&—f7’"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæQ õôùAÉ¥Ù…äA½±¥äð½1¥¹¬ø(€€€€€€€€€€€€€€ñ1¥¹¬Ñ¼ôˆ½Ñ•ÉµÌˆÍÑå±”õíì‘¥ÍÁ±…äè€‰±½¬œ°½±½Èè€Ù…È ´µÑ•áÐµµÕÑ”¤œ°™½¹ÑM¥é”è€œÄÑÁàœ°Á…‘‘¥¹œè€œÑÁà€Àœ°Ñ•áÑ•½É…Ñ¥½¸è€¹½¹”H }}>Terms & Conditions</Link>
+              <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Home</Link>
+              <Link to="/playground" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Capture Studio</Link>
+              <a href="#pricing" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Pricing</a>
+            </div>
+            <div className="footer-col">
+              <h4>Developers</h4>
+              <Link to="/docs" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>API Docs</Link>
+              <a href="https://api.shotlyapi.in/health">API Status</a>
+              <a href="https://github.com/MyWorld0007/shotlyapi">GitHub</a>
+            </div>
+            <div className="footer-col">
+              <h4>Company</h4>
+              <Link to="/privacy" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Privacy Policy</Link>
+              <Link to="/terms" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Terms & Conditions</Link>
             </div>
           </div>
           <div className="footer-bottom">

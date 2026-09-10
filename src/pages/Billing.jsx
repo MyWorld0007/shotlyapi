@@ -200,7 +200,7 @@ export default function Billing() {
                   </>
                 ) : (
                   <>
-                    <div className="plan-name">{PLANS[currentPlan] ? PLANS[currentPlan].name : 'Unknown'} Plan</div>
+                    <div className="plan-name">{PLANS[currentPlan] ? PLANS[currentPlan].name : 'No Active Plan'} Plan</div>
                     <div className="plan-price">
                       {PLANS[currentPlan] && PLANS[currentPlan].type === 'one_time'
                         ? formatPrice(PLANS[currentPlan].price) + ' one-time - ' + PLANS[currentPlan].limit + ' screenshots for ' + PLANS[currentPlan].duration

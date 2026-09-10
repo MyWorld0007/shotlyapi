@@ -143,7 +143,7 @@ function getTokenFromRequest(request) {
   return null
 }
 
-// ===== Email =====
+// ====== EMAIL ======
 async function sendEmail(env, to, subject, html) {
   if (!env.RESEND_API_KEY) return { skipped: true }
   var response = await fetch('https://api.resend.com/emails', {
@@ -155,13 +155,13 @@ async function sendEmail(env, to, subject, html) {
 }
 
 async function sendWelcomeEmail(env, email) {
-  var html = '<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;\"><div style=\"background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);\"><div style=\"display:flex;align-items:center;gap:10px;margin-bottom:32px;\"><div style=\"width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;\">S</div><span style=\"font-size:22px;font-weight:800;color:#0f172a;\">ShotlyAPI</span></div><h1 style=\"font-size:24px;color:#0f172a;margin:0 0 16px;\">Welcome to ShotlyAPI!</h1><p style=\"font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;\">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style=\"background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;\"><code style=\"font-size:14px;color:#2563eb;word-break:break-all;\">curl \"https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY\" -o screenshot.png</code></div><a href=\"https://shotlyapi.in/billing\" style=\"display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;\">Buy Trial Plan</a><hr style=\"border:none;border-top:1px solid #e2e8f0;margin:32px 0;\"><p style=\"font-size:13px;color:#94a3b8;margin:0;\">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
+  var html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Welcome to ShotlyAPI!</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;"><code style="font-size:14px;color:#2563eb;word-break:break-all;">curl "https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY" -o screenshot.png</code></div><a href="https://shotlyapi.in/billing" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Buy Trial Plan</a><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
   return await sendEmail(env, email, 'Welcome to ShotlyAPI!', html)
 }
 
 async function sendPasswordResetEmail(env, email, resetToken) {
   var resetUrl = 'https://shotlyapi.in/reset-password?token=' + resetToken
-  var html = '<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;\"><div style=\"background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);\"><div style=\"display:flex;align-items:center;gap:10px;margin-bottom:32px;\"><div style=\"width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;\">S</div><span style=\"font-size:22px;font-weight:800;color:#0f172a;\">ShotlyAPI</span></div><h1 style=\"font-size:24px;color:#0f172a;margin:0 0 16px;\">Reset your password</h1><p style=\"font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px;\">Click the button below to set a new password. This link expires in 1 hour.</p><a href=\"' + resetUrl + '\" style=\"display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;\">Reset Password</a><p style=\"font-size:14px;color:#64748b;margin:24px 0 0;\">If you did not request this, you can safely ignore this email.</p><hr style=\"border:none;border-top:1px solid #e2e8f0;margin:32px 0;\"><p style=\"font-size:13px;color:#94a3b8;margin:0;\">(c) 2026 ShotlyAPI.</p></div></div>'
+  var html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Reset your password</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px;">Click the button below to set a new password. This link expires in 1 hour.</p><a href="' + resetUrl + '" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Reset Password</a><p style="font-size:14px;color:#64748b;margin:24px 0 0;">If you did not request this, you can safely ignore this email.</p><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI.</p></div></div>'
   return await sendEmail(env, email, 'Reset your ShotlyAPI password', html)
 }
 
@@ -187,7 +187,7 @@ async function getUsageCount(env, apiKey) {
 }
 
 
-// ===== Rate Limiting =====
+// ====== RATE LIMITING ======
 async function checkRateLimit(env, ip, endpoint) {
   var result = await env.DB.prepare(
     "SELECT COUNT(*) as count FROM login_attempts WHERE ip = ? AND endpoint = ? AND timestamp >= datetime('now', '-15 minutes')"
@@ -251,11 +251,9 @@ function buildOracleUrl(env, params) {
   if (params.full_page) q.set('full_page', params.full_page)
   if (params.delay) q.set('delay', params.delay)
   if (params.wait_for_selector) q.set('wait_for_selector', params.wait_for_selector)
-  if (params.delay) q.set('delay', params.delay)
-  if (params.wait_for_selector) q.set('wait_for_selector', params.delay)
-  if (params.wait_for_event) q.set('wait_for_event', body.razorpay_payment_id)
+  if (params.wait_for_event) q.set('wait_for_event', params.wait_for_event)
   if (params.selector) q.set('selector', params.selector)
-  if (params.user_agent) q.set('user_agent', body.razorpay_payment_id)
+  if (params.user_agent) q.set('user_agent', params.user_agent)
   if (params.cookies) q.set('cookies', params.cookies)
   if (params.hide_elements) q.set('hide_elements', params.hide_elements)
   if (params.block_ads) q.set('block_ads', params.block_ads)
@@ -293,7 +291,7 @@ export default {
       var userId = generateId()
       var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: userId, email: body.email, iat: Date.now() }, jwtSecret)
-      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, apiKeyHash, apiKeyDisplayVal, 'none', new Date().toISOString()).run()
+      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, apiKeyHash, apiKeyDisplayVal, 'none', new Date().toISOString()).run()
       ctx.waitUntil(sendWelcomeEmail(env, body.email))
       return jsonResponse({ token: token, api_key: apiKey, api_key_display: apiKeyDisplayVal, email: body.email }, 200, { 'Set-Cookie': setAuthCookie(token) })
     }
@@ -446,8 +444,8 @@ export default {
       return jsonResponse({ key_id: env.RZP_KEY_ID, subscription_id: subscription.id, plan: planKey, type: 'subscription', amount: plan.price * 100 })
     }
 
-    // BILLING: VERIFX
-    if (path === '/api/billing/verif', && request.method === 'POST') {
+    // BILLING: VERIFY
+    if (path === '/api/billing/verify' && request.method === 'POST') {
       var token = getTokenFromRequest(request)
       if (!token) return jsonError(401, 'Not authenticated')
       var jwtSecret = env.JWT_SECRET
@@ -456,7 +454,7 @@ export default {
       var body = await request.json()
       var planKey = body.plan
       var plan = PLANS[planKey]
-      if (!plang) return jsonError(400, 'Invalid plan')
+      if (!plan) return jsonError(400, 'Invalid plan')
 
       if (!env.RZP_KEY_SECRET || env.RZP_KEY_ID.indexOf('rzp_test_') === 0) {
         var now = new Date().toISOString()
@@ -468,7 +466,7 @@ export default {
         return jsonResponse({ success: true, plan: planKey })
       }
 
-      // TRIAL: Verifyone-time payment with HMAC-SHA256
+      // TRIAL: Verify one-time payment with HMAC-SHA256
       if (plan.type === 'one_time') {
         var body2 = body.razorpay_order_id + '|' + body.razorpay_payment_id
         var expectedSig = await hmacSha256(body2, env.RZP_KEY_SECRET)
@@ -497,14 +495,14 @@ export default {
       }
     }
 
-    // BILLING: WEBHOOK
+    // BILLING: WEBHOOK,
     if (path === '/api/billing/webhook' && request.method === 'POST') {
       var body = await request.json()
       var webhookSig = request.headers.get('X-Razorpay-Signature')
       var webhookSecret = env.RZP_WEBHOOK_SECRET
       if (!webhookSecret) return jsonError(500, 'Webhook secret not configured')
       {
-        var rawBody = JSON.stringify({body)
+        var rawBody = JSON.stringify(body)
         var expectedWhSig = await hmacSha256(rawBody, webhookSecret)
         if (webhookSig !== expectedWhSig) return jsonError(401, 'Invalid webhook signature')
       }
@@ -512,7 +510,7 @@ export default {
       if (event === 'subscription.charged') {
         var subId2 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
         if (subId2) {
-          var user2 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId2)).first()
+          var user2 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId2).first()
           if (user2) {
             var expiresAt2 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             await env.DB.prepare('UPDATE users SET plan_expires_at = ? WHERE id = ?').bind(expiresAt2, user2.id).run()
@@ -523,7 +521,7 @@ export default {
         var subId3 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
         if (subId3) {
           var user3 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId3).first()
-           if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('none', user3.id).run() }
+          if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('none', user3.id).run() }
         }
       }
       return jsonResponse({ received: true })
@@ -543,10 +541,8 @@ export default {
       if (user.plan === 'none') return jsonError(403, 'No active plan. Purchase at https://shotlyapi.in/billing')
       if (isTrialExpired(user)) return jsonError(403, 'Trial expired. Upgrade at https://shotlyapi.in/billing')
       var oracleUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot/bulk'
-      var response = await fetch(oracleUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Server-Secret': env.SERVER_SECRET || '' }, body: JSON.stringify({body), signal: AbortSignal.timeout(120000) })
-      if (body.urls && Array.isArray(body.urls)) {
-        for (var i = 0; i < body.urls.length; i++) { await logUsage(env, body.api_key, body.urls[i]) }
-      }
+      var response = await fetch(oracleUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Server-Secret': env.SERVER_SECRET || '' }, body: JSON.stringify(body), signal: AbortSignal.timeout(120000) })
+      if (body.urls && Array.isArray(body.urls)) { for (var i = 0; i < body.urls.length; i++) { await logUsage(env, body.api_key, body.urls[i]) } }
       var data = await response.json()
       return jsonResponse(data)
     }

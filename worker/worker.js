@@ -489,9 +489,7 @@ export default {
         } else {
           return jsonError(400, 'Payment verification failed')
         }
-      } catch (verifyErr) {
-      return jsonError(500, 'Verify failed: ' + (verifyErr && verifyErr.message ? verifyErr.message : String(verifyErr)))
-       }
+      }
     
 
       // MONTHLY: Verify subscription payment with HMAC-SHA256

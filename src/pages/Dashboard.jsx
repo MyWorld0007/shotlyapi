@@ -7,6 +7,7 @@ const API_URL = 'https://api.shotlyapi.in'
 
 const PLAN_LABELS = {
   none: 'No Active Plan',
+  free: 'Free',
   trial: 'Trial',
   starter: 'Starter',
   growth: 'Growth',
@@ -15,6 +16,7 @@ const PLAN_LABELS = {
 
 const PLAN_LIMITS = {
   none: 0,
+  free: 20,
   trial: 100,
   starter: 2000,
   growth: 4000,

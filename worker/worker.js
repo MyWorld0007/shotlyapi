@@ -155,13 +155,13 @@ async function sendEmail(env, to, subject, html) {
 }
 
 async function sendWelcomeEmail(env, email) {
-  var html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Welcome to ShotlyAPI!</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;"><code style="font-size:14px;color:#2563eb;word-break:break-all;">curl "https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY" -o screenshot.png</code></div><a href="https://shotlyapi.in/billing" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Buy Trial Plan</a><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
+  var html = '<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;\"><div style=\"background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);\"><div style=\"display:flex;align-items:center;gap:10px;margin-bottom:32px;\"><div style=\"width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;\">S</div><span style=\"font-size:22px;font-weight:800;color:#0f172a;\">ShotlyAPI</span></div><h1 style=\"font-size:24px;color:#0f172a;margin:0 0 16px;\">Welcome to ShotlyAPI!</h1><p style=\"font-size:16px;color:#475569;line-height:1.6;margin:0 0 20px;\">Your account has been created. Purchase a Trial plan to start capturing screenshots.</p><div style=\"background:#f1f5f9;border-radius:12px;padding:20px;margin:24px 0;\"><code style=\"font-size:14px;color:#2563eb;word-break:break-all;\">curl \"https://api.shotlyapi.in/api/screenshot?url=https://example.com&api_key=YOUR_API_KEY\" -o screenshot.png</code></div><a href=\"https://shotlyapi.in/billing\" style=\"display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;\">Buy Trial Plan</a><hr style=\"border:none;border-top:1px solid #e2e8f0;margin:32px 0;\"><p style=\"font-size:13px;color:#94a3b8;margin:0;\">(c) 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div></div>'
   return await sendEmail(env, email, 'Welcome to ShotlyAPI!', html)
 }
 
 async function sendPasswordResetEmail(env, email, resetToken) {
   var resetUrl = 'https://shotlyapi.in/reset-password?token=' + resetToken
-  var html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;"><div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;"><div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;">S</div><span style="font-size:22px;font-weight:800;color:#0f172a;">ShotlyAPI</span></div><h1 style="font-size:24px;color:#0f172a;margin:0 0 16px;">Reset your password</h1><p style="font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px;">Click the button below to set a new password. This link expires in 1 hour.</p><a href="' + resetUrl + '" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Reset Password</a><p style="font-size:14px;color:#64748b;margin:24px 0 0;">If you did not request this, you can safely ignore this email.</p><hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"><p style="font-size:13px;color:#94a3b8;margin:0;">(c) 2026 ShotlyAPI.</p></div></div>'
+  var html = '<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:40px 20px;\"><div style=\"background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 16px rgba(0,0,0,.06);\"><div style=\"display:flex;align-items:center;gap:10px;margin-bottom:32px;\"><div style=\"width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;\">S</div><span style=\"font-size:22px;font-weight:800;color:#0f172a;\">ShotlyAPI</span></div><h1 style=\"font-size:24px;color:#0f172a;margin:0 0 16px;\">Reset your password</h1><p style=\"font-size:16px;color:#475569;line-height:1.6;margin:0 0 24px;\">Click the button below to set a new password. This link expires in 1 hour.</p><a href=\"' + resetUrl + '\" style=\"display:inline-block;background:#2563eb;color:#fff;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;\">Reset Password</a><p style=\"font-size:14px;color:#64748b;margin:24px 0 0;\">If you did not request this, you can safely ignore this email.</p><hr style=\"border:none;border-top:1px solid #e2e8f0;margin:32px 0;\"><p style=\"font-size:13px;color:#94a3b8;margin:0;\">(c) 2026 ShotlyAPI.</p></div></div>'
   return await sendEmail(env, email, 'Reset your ShotlyAPI password', html)
 }
 
@@ -274,6 +274,7 @@ export default {
 
     // AUTH: SIGNUP
     if (path === '/api/auth/signup' && request.method === 'POST') {
+     try {
       var clientIP = getClientIP(request)
       var signupAttempts = await checkRateLimit(env, clientIP, 'signup')
       if (signupAttempts >= 5) return jsonError(429, 'Too many signup attempts. Please try again in 15 minutes.')
@@ -291,9 +292,12 @@ export default {
       var userId = generateId()
       var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: userId, email: body.email, iat: Date.now() }, jwtSecret)
-      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, apiKeyHash, apiKeyDisplayVal, 'none', new Date().toISOString()).run()
+      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, apiKeyHash, apiKeyDisplayVal, 'none', new Date().toISOString()).run()
       ctx.waitUntil(sendWelcomeEmail(env, body.email))
       return jsonResponse({ token: token, api_key: apiKey, api_key_display: apiKeyDisplayVal, email: body.email }, 200, { 'Set-Cookie': setAuthCookie(token) })
+     } catch (signupErr) {
+      return jsonError(500, 'Signup failed: ' + (signupErr && signupErr.message ? signupErr.message : String(signupErr)))
+     }
     }
 
     // AUTH: LOGIN
@@ -495,7 +499,7 @@ export default {
       }
     }
 
-    // BILLING: WEBHOOK,
+    // BILLING: WEBHOOK
     if (path === '/api/billing/webhook' && request.method === 'POST') {
       var body = await request.json()
       var webhookSig = request.headers.get('X-Razorpay-Signature')
@@ -661,7 +665,7 @@ export default {
         var totalUsers = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first()
         var totalScreenshots = await env.DB.prepare('SELECT COUNT(*) as count FROM usage').first()
         var todayStart = new Date(); todayStart.setHours(0,0,0,0)
-        var screenshotsToday = await env.DB.prepare('SELECT COUNT(*) as count FROM usage WHERE created_at >= ?').bind(todayStart.toISOString()).first()
+        var screenshotsToday = await env.DB.prepare('SELECT COUNT(*) as count FROM usage WHERE timestamp >= ?').bind(todayStart.toISOString()).first()
         var trialUsers = await env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE plan = 'trial'").first()
         var starterUsers = await env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE plan = 'starter'").first()
         var growthUsers = await env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE plan = 'growth'").first()

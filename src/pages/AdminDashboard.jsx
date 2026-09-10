@@ -22,6 +22,10 @@ export default function AdminDashboard() {
     const resp = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' })
     if (resp.status === 403) { navigate('/admin/login'); return null }
     if (resp.status === 204) return {}
+    if (!resp.ok) {
+      const errBody = await resp.json().catch(() => ({}))
+      throw new Error(errBody.error || ('Request failed (' + resp.status + ')'))
+    }
     return resp.json()
   }, [navigate])
 

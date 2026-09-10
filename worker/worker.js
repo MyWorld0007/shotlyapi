@@ -130,7 +130,7 @@ function clearAuthCookie() {
 }
 
 function getCookie(request, name) {
-  var cookies = request.headers.get('Cookie') || ''
+  var cookies = request.headers.get('cookie') || ''
   var match = cookies.match(new RegExp('(^|;\\s*)' + name + '=([^;]+)'))
   return match ? match[2] : null
 }
@@ -320,298 +320,277 @@ export default {
       return jsonResponse({ token: token, api_key: (user.api_key && user.api_key !== 'REVOKED') ? user.api_key : null, api_key_display: displayKey, email: user.email, plan: user.plan, trial_started_at: user.trial_started_at, plan_expires_at: user.plan_expires_at }, 200, { 'Set-Cookie': setAuthCookie(token) })
     }
 
-    // AUTH: MBˆYˆ
-]OOH	ËØ\KØ]]ÛYIÈ	‰ˆ™\]Y\İ›Y]ÙOOH	ÑÑU	ÊHÂˆ˜\ˆÚÙ[ˆHÙ]ÚÙ[‘œ›ÛT™\]Y\İ
-™\]Y\İ
-BˆYˆ
-]ÚÙ[ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ó›İ]][XØ]Y	ÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-ÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙY
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÚÙ[‰ÊBˆ˜\ˆ\Ù\ˆH]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ
-ˆ”“ÓH\Ù\œÈÒT‘HYHÉÊK˜š[™
-XÛÙYZY
-K™š\œİ
+    // AUTH: ME
+    if (path === '/api/auth/me' && request.method === 'GET') {
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
+      var jwtSecret = env.JWT_SECRET
+      var decoded = await verifyJWT(token, jwtSecret)
+      if (!decoded) return jsonError(401, 'Invalid token')
+      var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
+      if (!user) return jsonError(404, 'User not found')
+      var displayKey = user.api_key_display || apiKeyDisplay(user.api_key) || 'sk_live_...'
+      return jsonResponse({ id: user.id, email: user.email, api_key: (user.api_key && user.api_key !== 'REVOKED') ? user.api_key : null, api_key_display: displayKey, plan: user.plan, trial_expired: isTrialExpired(user) })
+    }
 
-BˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛ‘\œ›ÜŠ	Õ\Ù\ˆ›İ›İ[™	ÊBˆ˜\ˆ\Ü^RÙ^HH\Ù\‹˜\WÚÙ^WÙ\Ü^H\RÙ^Q\Ü^J\Ù\‹˜\WÚÙ^JH	ÜÚ×Û]™WË‹‹‰Âˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈYˆ\Ù\‹šY[XZ[ˆ\Ù\‹™[XZ[\WÚÙ^Nˆ
-\Ù\‹˜\WÚÙ^H	‰ˆ\Ù\‹˜\WÚÙ^HOOH	Ô‘U“ÒÑQ	ÊHÈ\Ù\‹˜\WÚÙ^Hˆ[\WÚÙ^WÙ\Ü^Nˆ\Ü^RÙ^K[ˆ\Ù\‹œ[‹šX[Ù^\™Yˆ\ÕšX[^\™Y
-\Ù\ŠHJBˆB‚ˆËÈUUˆÑÓÕUˆYˆ
-]OOH	ËØ\KØ]]ÛÙÛİ]	È	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYHKŒÈ	ÔÙ]PÛÛÚÚÚYIÎˆÛX\]]ÛÛÚÚYJ
-HJBˆB‚ˆËÈUUˆ‘QÑS‘TUBˆYˆ
-]OOH	ËØ\KØ]]Ü™YÙ[™\˜]IÈ	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆHÂˆ˜\ˆÚÙ[ˆHÙ]ÚÙ[‘œ›ÛT™\]Y\İ
-™\]Y\İ
-BˆYˆ
-]ÚÙ[ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ó›İ]][XØ]Y	ÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-ÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙY
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÚÙ[‰ÊBˆ˜\ˆ™]ÒÙ^HHÙ[™\˜]P\RÙ^J
-Bˆ˜\ˆ™]Ò\ÚH]ØZ]\Ú\RÙ^J™]ÒÙ^JBˆ˜\ˆ™]Ñ\Ü^HH\RÙ^Q\Ü^J™]ÒÙ^JBˆ]ØZ][‹‘‹œ™\\™J•TUH\Ù\œÈÑU\WÚÙ^HH	ÔQU“ÒÑQ	Ë\WÚÙ^WÚ\ÚHË\WÚÙ^WÙ\Ü^HHÈÒT‘HYHÈŠK˜š[™
-™]Ò\Ú™]Ñ\Ü^KXÛÙYZY
-Kœ[Š
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈ\WÚÙ^Nˆ™]ÒÙ^K\WÚÙ^WÙ\Ü^Nˆ™]Ñ\Ü^HKŒÈ	ÔÙ]PÛÛÚÚYIÎˆÙ]]]ÛÛÚÚYJÚÙ[ŠHJBˆHØ]Ú
-™YÙ[‘\œŠHÂˆ™]\›ˆœÛÛ‘\œ›ÜŠL	Ô™YÙ[™\˜]H˜Z[Yˆ	È
-È
-™YÙ[‘\œˆ	‰ˆ™YÙ[‘\œ‹›Y\ÜØYÙHÈ™YÙ[‘\œ‹›Y\ÜØYÙHˆİš[™Ê™YÙ[‘\œŠJJBˆBˆB‚ˆËÈUUˆ“Ô‘ÓÕTÔÕÓÔ‘ˆYˆ
-]OOH	ËØ\KØ]]Ù›Ü™Ûİ\\ÜİÛÜ™	È	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ˜\ˆ™\Ù]THÙ]ÛY[T
-™\]Y\İ
-Bˆ˜\ˆ™\Ù]][\ÈH]ØZ]ÚXÚÔ˜]S[Z]
-[‹™\Ù]T	Ü™\Ù]	ÊBˆYˆ
-™\Ù]][\ÈHJH™]\›ˆœÛÛ‘\œ›ÜŠK	ÕÛÈX[H™\Ù]][\ËˆX\ÙHHYØZ[ˆ[ˆMHZ[]\Ë‰ÊBˆ˜\ˆ›ÙHH]ØZ]™\]Y\İšœÛÛŠ
-BˆYˆ
-X›ÙK™[XZ[
-H™]\›ˆœÛÛ‘\œ›ÜŠ	Ñ[XZ[™\]Z\™Y	ÊBˆ˜\ˆ\Ù\ˆH]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ
-ˆ”“ÓH\Ù\œÈÒT‘H[XZ[HÉÊK˜š[™
-›ÙK™[XZ[
-K™š\œİ
+    // AUTH: LOGOUT
+    if (path === '/api/auth/logout' && request.method === 'POST') {
+      return jsonResponse({ success: true }, 200, { 'Set-Cookie': clearAuthCookie() })
+    }
 
-BˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYKY\ÜØYÙNˆ	ÒYˆH[XZ[^\İËH™\Ù][šÈ\È™Y[ˆÙ[‰ÈJBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆ™\Ù]ÚÙ[ˆH]ØZ]XZÙR•Õ
-ÈZYˆ\Ù\‹šY[XZ[ˆ\Ù\‹™[XZ[™\Ù]ˆYKX]ˆ]K››İÊ
-K^ˆ]K››İÊ
-H
-ÈÍŒKİÙXÜ™]
-Bˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU™\Ù]İÚÙ[ˆHÈÒT‘HYHÉÊK˜š[™
-™\Ù]ÚÙ[‹\Ù\‹šY
-Kœ[Š
-BˆİØZ][[
-Ù[™\ÜİÛÜ™™\Ù][XZ[
-[‹›ÙK™[XZ[™\Ù]ÚÙ[ŠJBˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYKY\ÜØYÙNˆ	ÒYˆH[XZ[^\İËH™\Ù][šÈ\È™Y[ˆÙ[‰ÈJBˆB‚ˆËÈUUˆ‘TÑUTÔÕÓÔ‘ˆYˆ
-]OOH	ËØ\KØ]]Ü™\Ù]\\ÜİÛÜ™	È	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ˜\ˆ›ÙHH]ØZ]™\]Y\İšœÛÛŠ
-BˆYˆ
-X›ÙKÚÙ[ˆX›ÙKœ\ÜİÛÜ™
-H™]\›ˆœÛÛ‘\œ›ÜŠ	ÕÚÙ[ˆ[™™]È\ÜİÛÜ™™\]Z\™Y	ÊBˆYˆ
-›ÙKœ\ÜİÛÜ™›[™İŠH™]\›ˆœÛÛ‘\œ›ÜŠ	Ô\ÜİÛÜ™]\İ™H]X\İˆÚ\˜Xİ\œÉÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-›ÙKÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙYYXÛÙYœ™\Ù]
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÜˆ^\™Y™\Ù]ÚÙ[‰ÊBˆYˆ
-]K››İÊ
-HˆXÛÙY™^
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ô™\Ù]ÚÙ[ˆ\È^\™Y	ÊBˆ˜\ˆ\Ù\ˆH]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ
-ˆ”“ÓH\Ù\œÈÒT‘HYHÈS‘™\Ù]İÚÙ[ˆHÉÊK˜š[™
-XÛÙYZY›ÙKÚÙ[ŠK™š\œİ
-
-BˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[Y™\Ù]ÚÙ[‰ÊBˆ˜\ˆ™]ÔØ[HÙ[™\˜]RY
-
-Bˆ˜\ˆ™]Ò\ÚH]ØZ]\Ú\ÜİÛÜ™’ÑŒŠ›ÙKœ\ÜİÛÜ™™]ÔØ[
-Bˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU\ÜİÛÜ™Ú\ÚHËØ[HË™\Ù]İÚÙ[ˆH•SÒT‘HYHÉÊK˜š[™
-™]Ò\Ú™]ÔØ[\Ù\‹šY
-Kœ[Š
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYKY\ÜØYÙNˆ	Ô\ÜİÛÜ™™\Ù]İXØÙ\ÜÙ[K‰ÈJBˆB‚ˆËÈTĞQÑBˆYˆ
-]OOH	ËØ\Kİ\ØYÙIÈ	‰ˆ™\]Y\İ›Y]ÙOOH	ÑÑU	ÊHÂˆ˜\ˆÚÙ[ˆHÙ]ÚÙ[‘œ›ÛT™\]Y\İ
-™\]Y\İ
-BˆYˆ
-]ÚÙ[ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ó›İ]][XØ]Y	ÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-ÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙY
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÚÙ[‰ÊBˆ˜\ˆ\Ù\ˆH]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ
-ˆ”“ÓH\Ù\œÈÒT‘HYHÉÊK˜š[™
-XÛÙYZY
-K™š\œİ
-
-BˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛ‘\œ›ÜŠ	Õ\Ù\ˆ›İ›İ[™	ÊBˆ˜\ˆ\ÙYH]ØZ]Ù]\ØYÙPÛİ[
-[‹\Ù\‹˜\WÚÙ^JBˆ˜\ˆ[Z]H
-S”Öİ\Ù\‹œ[—H	‰ˆS”Öİ\Ù\‹œ[—K›[Z]
-Hˆ˜\ˆ™XÙ[H]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ\›[Y\İ[\”“ÓH\ØYÙHÒT‘H\WÚÙ^HHÈÔ‘Tˆ–H[Y\İ[\TĞÈSRUL	ÊK˜š[™
-\Ù\‹˜\WÚÙ^JK˜[
-
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİ]ÎˆÈ\ÙYˆ\ÙY[Z]ˆ[Z][ˆ\Ù\‹œ[‹šX[Ù^\™Yˆ\ÕšX[^\™Y
-\Ù\ŠHK™XÙ[ˆ™XÙ[œ™\İ[È×HJBˆB‚ˆËÈ’SS‘ÎˆÔ‘PUHÔ‘TˆÈÕP”ĞÔ’TSÓ‚ˆYˆ
-]OOH	ËØ\KØš[[™ËØÜ™X]K[Ü™\‰È	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ˜\ˆÚÙ[ˆHÙ]ÚÙ[‘œ›ÛT™\]Y\İ
-™\]Y\İ
-BˆYˆ
-]ÚÙ[ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ó›İ]][XØ]Y	ÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-ÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙY
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÚÙ[‰ÊBˆ˜\ˆ›ÙHH]ØZ]™\]Y\İšœÛÛŠ
-Bˆ˜\ˆ[’Ù^HH›ÙKœ[‚ˆ˜\ˆ[ˆHS”ÖÜ[’Ù^WBˆYˆ
-\[ˆ[’Ù^HOOH	Ùœ™YIÈ[’Ù^HOOH	Û›Û™IÊH™]\›ˆœÛÛ‘\œ›ÜŠ	Ò[˜[Y[‰ÊB‚ˆYˆ
-Y[‹”–”ÒÑVWÒQY[‹”–”ÒÑVWÔÑPÔ‘U[‹”–”ÒÑVWÒQš[™^ÙŠ	Üœİ\İÉÊHOOH
-HÂˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈ[[ÎˆYK[ˆ[’Ù^K[[İ[ˆ[‹œšXÙH
-ˆL\Nˆ[‹\HJBˆB‚ˆYˆ
-[‹\HOOH	ÛÛ™Wİ[YIÊHÂˆ˜\ˆ[[İ[H[‹œšXÙH
-ˆLˆ˜\ˆœ™\ÜH]ØZ]™]Ú
-	ÚÎ‹ËØ\Kœ˜^›Üœ^K˜ÛÛKİŒKÛÜ™\œÉËÂˆY]Ùˆ	ÔÔÕ	ËˆXY\œÎˆÈ	Ğ]]Üš^˜][Û‰Îˆœ]]XY\Š[ŠK	ĞÛÛ[U\IÎˆ	Ø\XØ][Û‹ÚœÛÛ‰ÈKˆ›ÙNˆ”ÓÓ‹œİš[™ÚYJÈ[[İ[ˆ[[İ[İ\œ™[˜ŞNˆ	ÒS”‰Ë™XÙZ\ˆ	ÜÚİWİšX[ÉÈ
-ÈXÛÙYZY
-È	×ÉÈ
-È]K››İÊ
-K›İ\ÎˆÈ[ˆ[’Ù^K\Ù\—ÚYˆXÛÙYZYHJKˆJBˆ˜\ˆÜ™\ˆH]ØZ]œ™\ÜšœÛÛŠ
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈÙ^WÚYˆ[‹”–”ÒÑVWÒQÜ™\—ÚYˆÜ™\‹šY[[İ[ˆ[[İ[\Nˆ	ÛÛ™Wİ[YIË[ˆ[’Ù^HJBˆB‚ˆ˜\ˆ[’Y[•˜\ˆH–”ÔS—ÒQÖÜ[’Ù^WBˆ˜\ˆ˜^›Üœ^T[’YH[–Ü[’Y[•˜\—BˆYˆ
-\˜^›Üœ^T[’Y
-H™]\›ˆœÛÛ‘\œ›ÜŠL	ÔİXœØÜš\[Ûˆ[ˆ›İÛÛ™šYİ\™YˆÙ]	È
-È[’Y[•˜\ˆ
-È	È[ˆÛÜšÙ\ˆ[ˆ˜\œË‰ÊBˆ˜\ˆœ™\ÜˆH]ØZ]™]Ú
-	ÚÎ‹ËØ\Kœ˜^›Üœ^K˜ÛÛKİŒKÜİXœØÜš\[ÛœÉËˆY]Ùˆ	ÔÔÕ	ËˆXY\œÎˆÈ	Ğ]]Üš^˜][Û‰Îˆœ]]XY\Š[ŠK	ĞÛÛ[U\IÎˆ	Ø\XØ][Û‹ÚœÛÛ‰ÈKˆ›ÙNˆ”ÓÓ‹œİš[™ÚYJÈ[—ÚYˆ˜^›Üœ^T[’Yİ\İÛY\—Û›İYNˆK]X[]NˆKİ[ØÛİ[ˆL‹›İ\ÎˆÈ[ˆ[’Ù^K\Ù\—ÚYˆXÛÙYZYHJKˆJBˆ˜\ˆİXœØÜš\[ÛˆH]ØZ]œ™\Ü‹šœÛÛŠ
-BˆYˆ
-İXœØÜš\[Û‹™\œ›ÜŠH™]\›ˆœÛÛ‘\œ›ÜŠL	Ô˜^›Üœ^H\œ›Üˆ	È
-È
-İXœØÜš\[Û‹™\œ›Ü‹™\ØÜš\[Ûˆ	Õ[šÛ›İÛ‰ÊJBˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈÙ^WÚYˆ[‹”–”ÒÑVWÒQİXœØÜš\[Û—ÚYˆİXœØÜš\[Û‹šY[ˆ[’Ù^K\Nˆ	ÜİXœØÜš\[Û‰Ë[[İ[ˆ[‹œšXÙH
-ˆLJBˆB‚ˆËÈ’SS‘Îˆ‘T’Q–BˆYˆ
-]OOH	ËØ\KØš[[™Ëİ™\šYIÈ	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ˜\ˆÚÙ[ˆHÙ]ÚÙ[‘œ›ÛT™\]Y\İ
-™\]Y\İ
-BˆYˆ
-]ÚÙ[ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ó›İ]][XØ]Y	ÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-ÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙY
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÚÙ[‰ÊBˆ˜\ˆ›ÙHH]ØZ]™\]Y\İšœÛÛŠ
-Bˆ˜\ˆ[’Ù^HH›ÙKœ[‚ˆ˜\ˆ[ˆHS”ÖÜ[’Ù^WBˆYˆ
-\[ŠH™]\›ˆœÛÛ‘\œ›ÜŠ	Ò[˜[Y[‰ÊB‚ˆYˆ
-Y[‹”–”ÒÑVWÔÑPÔ‘U[‹”–”ÒÑVWÒQš[™^ÙŠ	Üœİ\İÉÊHOOH
-HÂˆ˜\ˆ›İÈH™]È]J
-KÒTÓÔİš[™Ê
-BˆYˆ
-[‹\HOOH	ÛÛ™Wİ[YIÊHÂˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU[ˆHËšX[Üİ\YØ]HÈÒT‘HYHÉÊK˜š[™
-[’Ù^K›İËXÛÙYZY
-Kœ[Š
-BˆH[ÙHÂˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU[ˆHÈÒT‘HYHÉÊK˜š[™
-[’Ù^KXÛÙYZY
-Kœ[Š
-BˆBˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYK[ˆ[’Ù^HJBˆB‚ˆËÈ’PSˆ™\šY[Û™K][YH^[Y[Ú]PPËTÒLM‚ˆYˆ
-[‹\HOOH	ÛÛ™Wİ[YIÊHÂˆ˜\ˆ›ÙLˆH›ÙKœ˜^›Üœ^WÛÜ™\—ÚY
-È	ß	È
-È›ÙKœ˜^›Üœ^WÜ^[Y[ÚYˆ˜\ˆ^XİYÚYÈH]ØZ]XXÔÚLMŠ›ÙL‹[‹”–”ÒÑVWÔÑPÔ‘U
-BˆYˆ
-^XİYÚYÈOOH›ÙKœ˜^›Üœ^WÜÚYÛ˜]\™JHÂˆ˜\ˆ›İÌˆH™]È]J
-KÒTÓÔİš[™Ê
-Bˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU[ˆHËšX[Üİ\YØ]HÈÒT‘HYHÉÊK˜š[™
-[’Ù^K›İÌ‹XÛÙYZY
-Kœ[Š
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYK[ˆ[’Ù^KšX[Üİ\YØ]ˆ›İÌˆJBˆH[ÙHÂˆ™]\›ˆœÛÛ‘\œ›ÜŠ	Ô^[Y[™\šYšXØ][Ûˆ˜Z[Y	ÊBˆBˆB‚ˆËÈSÓ•Nˆ™\šYHİXœØÜš\[Ûˆ^[Y[Ú]PPËTÒLM‚ˆ˜\ˆİX’YH›ÙKœ˜^›Üœ^WÜİXœØÜš\[Û—ÚYˆ˜\ˆ^[Y[YH›ÙKœ˜^›Üœ^WÜ^[Y[ÚYˆ˜\ˆÚYÛ˜]\™HH›ÙKœ˜^›Üœ^WÜÚYÛ˜]\™BˆYˆ
-\İX’Y\^[Y[Y\ÚYÛ˜]\™JH™]\›ˆœÛÛ‘\œ›ÜŠ	ÓZ\ÜÚ[™ÈİXœØÜš\[Ûˆ^[Y[]Z[ÉÊBˆ˜\ˆ›ÙL˜ˆH^[Y[Y
-È	ß	È
-ÈİX’Yˆ˜\ˆ^XİYÚYÌˆH]ØZ]XXÔÚLMŠ›ÙL˜‹[‹”–”ÒÑVWÔÑPÔ‘U
-BˆYˆ
-^XİYÚYÌˆOOHÚYÛ˜]\™JHÂˆ˜\ˆ^\™\Ğ]H™]È]J]K››İÊ
-H
-ÈÌ
-ˆ
-ˆŒ
-ˆŒ
-ˆL
-KÒTÓÔİš[™Ê
-Bˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU[ˆHËİXœØÜš\[Û—ÚYHË[›—Ù^\™\×Ø]HÈÒT‘HYHÉÊK˜š[™
-[’Ù^KİX’Y^\™\Ğ]XÛÙYZY
-Kœ[Š
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈİXØÙ\ÜÎˆYK[ˆ[’Ù^KİXœØÜš\[Û—ÚYˆİX’YJBˆH[ÙHÂˆ™]\›ˆœÛÛ‘\œ›ÜŠ	ÔİXœØÜš\[Ûˆ^[Y[™\šYšXØ][Ûˆ˜Z[Y	ÊBˆBˆB‚ˆËÈ’SS‘ÎˆÑP’ÓÒÂˆYˆ
-]OOH	ËØ\KØš[[™ËİÙXšÛÚÉÈ	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ˜\ˆ›ÙHH]ØZ]™\]Y\İšœÛÛŠ
-Bˆ˜\ˆÙXšÛÚÔÚYÈH™\]Y\İšXY\œË™Ù]
-	ÖT˜^›Üœ^KTÚYÛ˜]\™IÊBˆ˜\ˆÙXšÛÚÔÙXÜ™]H[‹”–”ÕÑP’ÓÒ×ÔÑPÔ‘UˆYˆ
-]ÙXšÛÚÔÙXÜ™]
-H™]\›ˆœÛÛ‘\œ›ÜŠL	ÕÙXšÛÚÈÙXÜ™]›İÛÛ™šYİ\™Y	ÊBˆÂˆ˜\ˆ˜]Ğ›ÙHH”ÓÓ‹œİš[™ÚYJ›ÙJBˆ˜\ˆ^XİYÚÚYÈH]ØZ]XXÔÚLMŠ˜]Ğ›ÙKÙXšÛÚÔÙXÜ™]
-BˆYˆ
-ÙXšÛÚÔÚYÈOOH^XİYÚÚYÊH™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÙXšÛÚÈÚYÛ˜]\™IÊBˆBˆ˜\ˆ]™[H›ÙK™]™[ˆYˆ
-]™[OOH	ÜİXœØÜš\[Û‹˜Ú\™ÙY	ÊHÂˆ˜\ˆİX’YˆH
-›ÙKœ^[ØY	‰ˆ›ÙKœ^[ØYœİXœØÜš\[Ûˆ	‰ˆ›ÙKœ^[ØYœİXœØÜš\[Û‹™[]JHÈ›ÙKœ^[ØYœİXœØÜš\[Û‹™[]KšYˆ[ˆYˆ
-İX’YŠHÂˆ˜\ˆ\Ù\ŒˆH]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ
-ˆ”“ÓH\Ù\œÈÒT‘HİXœØÜš\[Û—ÚYHÉÊK˜š[™
-İX’YŠK™š\œİ
-
-BˆYˆ
-\Ù\ŒŠHÂˆ˜\ˆ^\™\Ğ]ˆH™]È]J]K››İÊ
-H
-ÈÌ
-ˆ
-ˆŒ
-ˆŒ
-ˆL
-KÒTÓÔİš[™Ê
-Bˆ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU[—Ù^\™\×Ø]HÈÒT‘HYHÉÊK˜š[™
-^\™\Ğ]‹\Ù\Œ‹šY
-Kœ[Š
-BˆBˆBˆBˆYˆ
-]™[OOH	ÜİXœØÜš\[Û‹˜Ø[˜Ù[Y	ÊHÂˆ˜\ˆİX’YÈH
-›ÙKœ^[ØY	‰ˆ›ÙKœ^[ØYœİXœØÜš\[Ûˆ	‰ˆ›ÙKœ^[ØYœİXœØÜš\[Û‹™[]JHÈ›ÙKœ^[ØYœİXœØÜš\[Û‹™[]KšYˆ[ˆYˆ
-İX’YÊHÂˆ˜\ˆ\Ù\ŒÈH]ØZ][‹‘‹œ™\\™J	ÔÑSPÕ
-ˆ”“ÓH\Ù\œÈÒT‘HİXœØÜš\[Û—ÚYHÉÊK˜š[™
-İX’YÊK™š\œİ
-
-BˆYˆ
-\Ù\ŒÊHÈ]ØZ][‹‘‹œ™\\™J	ÕTUH\Ù\œÈÑU[ˆHÈÒT‘HYHÉÊK˜š[™
-	Û›Û™IË\Ù\ŒËšY
-Kœ[Š
-HBˆBˆ™]\›ˆœÛÛ”™\ÜÛœÙJÈ™XÙZ]™YˆYHJBˆB‚ˆËÈ•SÈĞÔ‘QS”ÒÕˆYˆ
-]OOH	ËØ\KÜØÜ™Y[œÚİØ[ÉÈ	‰ˆ™\]Y\İ›Y]ÙOOH	ÔÔÕ	ÊHÂˆ˜\ˆÚÙ[ˆHÙ]ÚÙ[‘œ›ÛT™\]Y\İ
-™\]Y\İ
-BˆYˆ
-]ÚÙ[ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ó›İ]][XØ]Y	ÊBˆ˜\ˆİÙXÜ™]H[‹’•ÕÔÑPÔ‘Uˆ˜\ˆXÛÙYH]ØZ]™\šYR•Õ
-ÚÙ[‹İÙXÜ™]
-BˆYˆ
-YXÛÙY
-H™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YÚÙ[‰ÊBˆ˜\ˆ›ÙHH]ØZ]™\]Y\İšœÛÛŠ
-BˆYˆ
-X›ÙK˜\WÚÙ^JH™]\›ˆœÛÛ‘\œ›ÜŠ	ÓZ\ÜÚ[™È\WÚÙ^IÊBˆ˜\ˆ\Ù\ˆH]ØZ]Ù]\Ù\P\RÙ^J[‹›ÙK˜\WÚÙ^JBˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YTHÙ^IÊBˆYˆ
-\Ù\‹œ[ˆOOH	Û›Û™IÊH™]\›ˆœÛÛ‘\œ›ÜŠË	Ó›ÈXİ]™H[‹ˆ\˜Ú\ÙH]Î‹ËÜÚİX\Kš[‹Øš[[™ÉÊBˆYˆ
-\ÕšX[^\™Y
-\Ù\ŠJH™]\›ˆœÛÛ‘\œ›ÜŠË	ÕšX[^\™Yˆ\Ü˜YH]Î‹ËÜÚİX\Kš[‹Øš[[™ÉÊBˆ˜\ˆÜ˜XÛU\›H
-[‹“ÔPÓWÔÑT•‘T—ÕT“	Ú‹ËÛØØ[ÜİŒÌ	ÊH
-È	ËØ\KÜØÜ™Y[œÚİØ[ÉÂˆ˜\ˆ™\ÜÛœÙHH]ØZ]™]Ú
-Ü˜XÛU\›ÈY]Ùˆ	ÔÔÕ	ËXY\œÎˆÈ	ĞÛÛ[U\IÎˆ	Ø\XØ][Û‹ÚœÛÛ‰Ë	ÖTÙ\™\‹TÙXÜ™]	Îˆ[‹”ÑT•‘T—ÔÑPÔ‘U	ÉÈK›ÙNˆ”ÓÓ‹œİš[™ÚYJ›ÙJKÚYÛ˜[ˆX›ÜÚYÛ˜[[Y[İ]
-LŒ
-HJBˆYˆ
-›ÙK\›È	‰ˆ\œ˜^Kš\Ğ\œ˜^J›ÙK\›ÊJHÈ›Üˆ
-˜\ˆHHÈH›ÙK\›Ë›[™İÈJÊÊHÈ]ØZ]ÙÕ\ØYÙJ[‹›ÙK˜\WÚÙ^K›ÙK\›ÖÚWJHHBˆ˜\ˆ]HH]ØZ]™\ÜÛœÙKšœÛÛŠ
-Bˆ™]\›ˆœÛÛ”™\ÜÛœÙJ]JBˆB‚ˆËÈĞÔ‘QS”ÒÕˆYˆ
-]OOH	ËØ\KÜØÜ™Y[œÚİ	È	‰ˆ™\]Y\İ›Y]ÙOOH	ÑÑU	ÊHÂˆ˜\ˆ\˜[\ÈHÙ]ØÜ™Y[œÚİ\˜[\Ê\›
-BˆYˆ
-\\˜[\Ë\›	‰ˆ\\˜[\Ë˜İ\İÛWÚ[
-H™]\›ˆœÛÛ‘\œ›ÜŠ	ÓZ\ÜÚ[™È™\]Z\™Y\˜[Y]\ˆ\›Üˆİ\İÛWÚ[	ÊBˆËÈÚXÚÈ]]Üš^˜][ÛˆXY\ˆš\œİ˜[˜XÚÈÈT“\˜[H›Üˆ[[ÈÙ^HÛ›Bˆ˜\ˆXY\’Ù^HH[ˆ˜\ˆ]]ˆH™\]Y\İšXY\œË™Ù]
-	Ğ]]Üš^˜][Û‰ÊBˆYˆ
-]]ˆ	‰ˆ]]‹š[™^ÙŠ	Ğ™X\™\ˆ	ÊHOOH
-HXY\’Ù^HH]]‹œ™\XÙJ	Ğ™X\™\ˆ	Ë	ÉÊBˆ˜\ˆ\RÙ^HHXY\’Ù^H\˜[\Ë˜\WÚÙ^BˆYˆ
-X\RÙ^JH™]\›ˆœÛÛ‘\œ›ÜŠK	ÓZ\ÜÚ[™È™\]Z\™Y\˜[Y]\ˆ\WÚÙ^Kˆ\ÙH]]Üš^˜][ÛˆXY\ˆÜˆ\WÚÙ^HT“\˜[IÊBˆËÈYˆ\Ú[™ÈT“\˜[H
-›İXY\ŠKÛ›H[İÈH[[ÈÙ^BˆYˆ
-ZXY\’Ù^H	‰ˆ\˜[\Ë˜\WÚÙ^H	‰ˆ\˜[\Ë˜\WÚÙ^HOOH	Ù[[ËZÙ^K\ÚİIÊHÂˆ™]\›ˆœÛÛ‘\œ›ÜŠK	Ñ›ÜˆÙXİ\š]KTHÙ^\È]\İ™HÙ[šXH]]Üš^˜][ÛˆXY\‹ˆ^[\Nˆ]]Üš^˜][Ûˆ™X\™\ˆÚ×Û]™WŞ	ÊBˆBˆ˜\ˆ\Ù\ˆH]ØZ]Ù]\Ù\P\RÙ^J[‹\RÙ^JBˆYˆ
-]\Ù\ŠH™]\›ˆœÛÛ‘\œ›ÜŠK	Ò[˜[YTHÙ^KˆÙ]Û™H]Î‹ËÜÚİX\Kš[‰ÊBˆYˆ
-\Ù\‹œ[ˆOOH	Û›Û™IÊH™]\›ˆœÛÛ‘\œ›ÜŠË	Ó›ÈXİ]™H[‹ˆ\˜Ú\ÙH]Î‹ËÜÚİX\Kš[‹Øš[[™ÉÊBˆYˆ
-\ÕšX[^\™Y
-\Ù\ŠJH™]\›ˆœÛÛ‘\œ›ÜŠË	Ö[İ\ˆËY^HšX[\È^\™Yˆ\Ü˜YH]Î‹ËÜÚİX\Kš[‹Øš[[™ÉÊBˆ˜\ˆ\ÙYH]ØZ]Ù]\ØYÙPÛİ[
-[‹\RÙ^JBˆ˜\ˆ[Z]H
-S”Öİ\Ù\‹œ[—H	‰ˆS”Öİ\Ù\‹œ[—K›[Z]
-HˆYˆ
-\ÙYH[Z]
-H™]\›ˆœÛÛ‘\œ›ÜŠË	Õ\ØYÙH[Z]^ÙYYY
-	È
-È\ÙY
-È	ËÉÈ
-È[Z]
-È	ÊKˆ\Ü˜YH]Î‹ËÜÚİX\Kš[‹Øš[[™ÉÊB‚ˆYˆ
-\˜[\Ë™^˜Xİİ^OOH	İYIÊHÂˆ˜\ˆÜ˜XÛU\›HZ[Ü˜XÛU\›
-[‹\˜[\ÊBˆHÂˆ˜\ˆ™\ÜH]ØZ]™]Ú
-Ü˜XÛU\›ÈÚYÛ˜[ˆX›ÜÚYÛ˜[[Y[İ]
-L
-KXY\œÎˆÈ	ÖTÙ\™\‹TÙXÜ™]	Îˆ[‹”ÑT•‘T—ÔÑPÔ‘U	ÉÈHJBˆYˆ
-\™\Ü›ÚÊH™]\›ˆœÛÛ‘\œ›ÜŠL	Õ^^˜Xİ[Ûˆ˜Z[Y‰ÊBˆ˜\ˆ]HH]ØZ]™\ÜšœÛÛŠ
-Bˆ]ØZ]ÙÕ\ØYÙJ[‹\RÙ^K\˜[\Ë\›	Øİ\İÛWÚ[	ÊBˆ™]\›ˆœÛÛ”™\ÜÛœÙJ]JBˆHØ]Ú
-JHÈ™]\›ˆœÛÛ‘\œ›ÜŠL	ĞÛİ[›İ™XXÚØÜ™Y[œÚİÙ\™\‹‰ÊHBˆB‚ˆ˜\ˆØXÚRÙ^HHZ[ØXÚRÙ^J\˜[\ÊBˆYˆ
-[‹”ĞÔ‘QS”ÒÕÈ	‰ˆ\˜[\Ë™œ™\ÚOOH	İYIÊHÂˆ˜\ˆØXÚYH]ØZ][‹”ĞÔ‘QS”ÒÕË™Ù]
-ØXÚRÙ^JBˆYˆ
-ØXÚY
-HÂˆ]ØZ]ÙÕ\ØYÙJ[‹\RÙ^K\˜[\Ë\›	Øİ\İÛWÚ[	ÊBˆ˜\ˆİH\˜[\Ë™›Ü›X]OOH	Ü‰ÈÈ	Ø\XØ][Û‹Ü‰Èˆ	Ú[XYÙKÉÈ
-È\˜[\Ë™›Ü›X]ˆ™]\›ˆ™]È™\ÜÛœÙJØXÚYÈXY\œÎˆÈ	ĞÛÛ[U\IÎˆİ	ÖPØXÚIÎˆ	ÒU	Ë	ĞXØÙ\ÜËPÛÛ›ÛP[İËSÜšYÚ[‰Îˆ	ÚÎ‹ËÜÚİX\Kš[‰Ë	ÔİšXİU˜[œÜÜTÙXİ\š]IÎˆ	ÛX^XYÙOLÌMLÍŒÈ[˜ÛYTİX‘ÛXZ[œÉË	ÖPÛÛ[U\KSÜ[ÛœÉÎˆ	Û›ÜÛšY™‰Ë	ÖQœ˜[YKSÜ[ÛœÉÎˆ	ÑS–IÈHJBˆBˆB‚ˆ˜\ˆÜ˜XÛU\›ˆHZ[Ü˜XÛU\›
-[‹\˜[\ÊBˆHÂˆ˜\ˆ™\ÜˆH]ØZ]™]Ú
-Ü˜XÛU\›‹ÈÚYÛ˜[ˆX›ÜÚYÛ˜[[Y[İ]
-L
-KXY\œÎˆÈ	ÖTÙ\™\‹TÙXÜ™]	Îˆ[‹”ÑT•‘T—ÔÑPÔ‘U	ÉÈHJBˆYˆ
-\™\Ü‹›ÚÊH™]\›ˆœÛÛ‘\œ›ÜŠL	ÔØÜ™Y[œÚİ˜Z[YˆHT“(might not be accessible.')
-        var imageBuffer = await resp2.arrayBuffer()
-        if (env.SCREENSHOTS) { await env.SCREENSHOTS.put(cacheKey, imageBuffer, { customMetadata: { url: params.url || 'custom_html', created: new Date().toISOString() } }) }
-        await logUsage(env, apiKey, params.url || 'custom_html')
-        var ct2 = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
-        return new Response(imageBuffer, { headers: { 'Content-Type': ct2, 'X-Cache': 'MISS', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
-      } catch (e) {
-        return jsonError(500, 'Could not reach screenshot server. Try again in a few seconds.')
+    // AUTH: REGENERATE
+    if (path === '/api/auth/regenerate' && request.method === 'POST') {
+      try {
+        var token = getTokenFromRequest(request)
+        if (!token) return jsonError(401, 'Not authenticated')
+        var jwtSecret = env.JWT_SECRET
+        var decoded = await verifyJWT(token, jwtSecret)
+        if (!decoded) return jsonError(401, 'Invalid token')
+        var newKey = generateApiKey()
+        var newHash = await hashApiKey(newKey)
+        var newDisplay = apiKeyDisplay(newKey)
+        await env.DB.prepare("UPDATE users SET api_key = 'REVOKED', api_key_hash = ?, api_key_display = ? WHERE id = ?").bind(newHash, newDisplay, decoded.uid).run()
+        return jsonResponse({ api_key: newKey, api_key_display: newDisplay }, 200, { 'Set-Cookie': setAuthCookie(token) })
+      } catch (regenErr) {
+        return jsonError(500, 'Regenerate failed: ' + (regenErr && regenErr.message ? regenErr.message : String(regenErr)))
       }
     }
 
-    return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
-  },
-}
+    // AUTH: FORGOT PASSWORD
+    if (path === '/api/auth/forgot-password' && request.method === 'POST') {
+      var resetIP = getClientIP(request)
+      var resetAttempts = await checkRateLimit(env, resetIP, 'reset')
+      if (resetAttempts >= 5) return jsonError(429, 'Too many reset attempts. Please try again in 15 minutes.')
+      var body = await request.json()
+      if (!body.email) return jsonError(400, 'Email required')
+      var user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(body.email).first()
+      if (!user) return jsonResponse({ success: true, message: 'If the email exists, a reset link has been sent.' })
+      var jwtSecret = env.JWT_SECRET
+      var resetToken = await makeJWT({ uid: user.id, email: user.email, reset: true, iat: Date.now(), exp: Date.now() + 3600000 }, jwtSecret)
+      await env.DB.prepare('UPDATE users SET reset_token = ? WHERE id = ?').bind(resetToken, user.id).run()
+      ctx.waitUntil(sendPasswordResetEmail(env, body.email, resetToken))
+      return jsonResponse({ success: true, message: 'If the email exists, a reset link has been sent.' })
+    }
 
+    // AUTH: RESET PASSWORD
+    if (path === '/api/auth/reset-password' && request.method === 'POST') {
+      var body = await request.json()
+      if (!body.token || !body.password) return jsonError(400, 'Token and new password required')
+      if (body.password.length < 6) return jsonError(400, 'Password must be at least 6 characters')
+      var jwtSecret = env.JWT_SECRET
+      var decoded = await verifyJWT(body.token, jwtSecret)
+      if (!decoded || !decoded.reset) return jsonError(401, 'Invalid or expired reset token')
+      if (Date.now() > decoded.exp) return jsonError(401, 'Reset token has expired')
+      var user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND reset_token = ?').bind(decoded.uid, body.token).first()
+      if (!user) return jsonError(401, 'Invalid reset token')
+      var newSalt = generateId()
+      var newHash = await hashPasswordPBKDF2(body.password, newSalt)
+      await env.DB.prepare('UPDATE users SET password_hash = ?, salt = ?, reset_token = NULL WHERE id = ?').bind(newHash, newSalt, user.id).run()
+      return jsonResponse({ success: true, message: 'Password reset successfully.' })
+    }
+
+    // USAGE
+    if (path === '/api/usage' && request.method === 'GET') {
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
+      var jwtSecret = env.JWT_SECRET
+      var decoded = await verifyJWT(token, jwtSecret)
+      if (!decoded) return jsonError(401, 'Invalid token')
+      var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(decoded.uid).first()
+      if (!user) return jsonError(404, 'User not found')
+      var used = await getUsageCount(env, user.api_key)
+      var limit = (PLANS[user.plan] && PLANS[user.plan].limit) || 0
+      var recent = await env.DB.prepare('SELECT url, timestamp FROM usage WHERE api_key = ? ORDER BY timestamp DESC LIMIT 10').bind(user.api_key).all()
+      return jsonResponse({ stats: { used: used, limit: limit, plan: user.plan, trial_expired: isTrialExpired(user) }, recent: recent.results || [] })
+    }
+
+    // BILLING: CREATE ORDER / SUBSCRIPTION
+    if (path === '/api/billing/create-order' && request.method === 'POST') {
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
+      var jwtSecret = env.JWT_SECRET
+      var decoded = await verifyJWT(token, jwtSecret)
+      if (!decoded) return jsonError(401, 'Invalid token')
+      var body = await request.json()
+      var planKey = body.plan
+      var plan = PLANS[planKey]
+      if (!plan || planKey === 'free' || planKey === 'none') return jsonError(400, 'Invalid plan')
+
+      if (!env.RZP_KEY_ID || !env.RZP_KEY_SECRET || env.RZP_KEY_ID.indexOf('rzp_test_') === 0) {
+        return jsonResponse({ demo: true, plan: planKey, amount: plan.price * 100, type: plan.type })
+      }
+
+      if (plan.type === 'one_time') {
+        var amount = plan.price * 100
+        var rzpResp = await fetch('https://api.razorpay.com/v1/orders', {
+          method: 'POST',
+          headers: { 'Authorization': rzpAuthHeader(env), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: amount, currency: 'INR', receipt: 'shotly_trial_' + decoded.uid + '_' + Date.now(), notes: { plan: planKey, user_id: decoded.uid } }),
+        })
+        var order = await rzpResp.json()
+        return jsonResponse({ key_id: env.RZP_KEY_ID, order_id: order.id, amount: amount, type: 'one_time', plan: planKey })
+      }
+
+      var planIdEnvVar = RZP_PLAN_IDS[planKey]
+      var razorpayPlanId = env[planIdEnvVar]
+      if (!razorpayPlanId) return jsonError(500, 'Subscription plan not configured. Set ' + planIdEnvVar + ' in Worker env vars.')
+      var rzpResp2 = await fetch('https://api.razorpay.com/v1/subscriptions', {
+        method: 'POST',
+        headers: { 'Authorization': rzpAuthHeader(env), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: razorpayPlanId, customer_notify: 1, quantity: 1, total_count: 12, notes: { plan: planKey, user_id: decoded.uid } }),
+      })
+      var subscription = await rzpResp2.json()
+      if (subscription.error) return jsonError(500, 'Razorpay error: ' + (subscription.error.description || 'Unknown'))
+      return jsonResponse({ key_id: env.RZP_KEY_ID, subscription_id: subscription.id, plan: planKey, type: 'subscription', amount: plan.price * 100 })
+    }
+
+    // BILLING: VERIFX
+    if (path === '/api/billing/verify' && request.method === 'POST') {
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
+      var jwtSecret = env.JWT_SECRET
+      var decoded = await verifyJWT(token, jwtSecret)
+      if (!decoded) return jsonError(401, 'Invalid token')
+      var body = await request.json()
+      var planKey = body.plan
+      var plan = PLANS[planKey]
+      if (!plan) return jsonError(400, 'Invalid plan')
+
+      if (!env.RZP_KEY_SECRET || env.RZP_KEY_ID.indexOf('rzp_test_') === 0) {
+        var now = new Date().toISOString()
+        if (plan.type === 'one_time') {
+          await env.DB.prepare('UPDATE users SET plan = ?, trial_started_at = ? WHERE id = ?').bind(planKey, now, decoded.uid).run()
+        } else {
+          await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind(planKey, decoded.uid).run()
+        }
+        return jsonResponse({ success: true, plan: planKey })
+      }
+
+      // TRIAL: Verify one-time payment with HMAC-SHA256
+      if (plan.type === 'one_time') {
+        var body2 = body.razorpay_order_id + '|' + body.razorpay_payment_id
+        var expectedSig = await hmacSha256(body2, env.RZP_KEY_SECRET)
+        if (expectedSig === body.razorpay_signature) {
+          var now2 = new Date().toISOString()
+          await env.DB.prepare('UPDATE users SET plan = ?, trial_started_at = ? WHERE id = ?').bind(planKey, now2, decoded.uid).run()
+          return jsonResponse({ success: true, plan: planKey, trial_started_at: now2 })
+        } else {
+          return jsonError(400, 'Payment verification failed')
+        }
+      }
+
+      // MONTHLY: Verify subscription payment with HMAC-SHA256
+      var subId = body.razorpay_subscription_id
+      var paymentId = body.razorpay_payment_id
+      var signature = body.razorpay_signature
+      if (!subId || !paymentId || !signature) return jsonError(400, 'Missing subscription payment details')
+      var body2b = paymentId + '|' + subId
+      var expectedSig2 = await hmacSha256(body2b, env.RZP_KEY_SECRET)
+      if (expectedSig2 === signature) {
+        var expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        await env.DB.prepare('UPDATE users SET plan = ?, subscription_id = ?, plan_expires_at = ? WHERE id = ?').bind(planKey, subId, expiresAt, decoded.uid).run()
+        return jsonResponse({ success: true, plan: planKey, subscription_id: subId })
+      } else {
+        return jsonError(400, 'Subscription payment verification failed')
+      }
+    }
+
+    // BILLING: WEBHOOK
+    if (path === '/api/billing/webhook' && request.method === 'POST') {
+      var body = await request.json()
+      var webhookSig = request.headers.get('X-Razorpay-Signature')
+      var webhookSecret = env.RZP_WEBHOOK_SECRET
+      if (!webhookSecret) return jsonError(500, 'Webhook secret not configured')
+      {
+        var rawBody = JSON.stringify(body)
+        var expectedWhSig = await hmacSha256(rawBody, webhookSecret)
+        if (webhookSig !== expectedWhSig) return jsonError(401, 'Invalid webhook signature')
+      }
+      var event = body.event
+      if (event === 'subscription.charged') {
+        var subId2 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
+        if (subId2) {
+          var user2 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId2).first()
+          if (user2) {
+            var expiresAt2 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            await env.DB.prepare('UPDATE users SET plan_expires_at = ? WHERE id = ?').bind(expiresAt2, user2.id).run()
+          }
+        }
+      }
+      if (event === 'subscription.cancelled') {
+        var subId3 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
+        if (subId3) {
+          var user3 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId3).first()
+          if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('none', user3.id).run() }
+        }
+      }
+      return jsonResponse({ received: true })
+    }
+
+    // BULK SCREENSHOT
+    if (path === '/api/screenshot/bulk' && request.method === 'POST') {
+      var token = getTokenFromRequest(request)
+      if (!token) return jsonError(401, 'Not authenticated')
+      var jwtSecret = env.JWT_SECRET
+      var decoded = await verifyJWT(token, jwtSecret)
+      if (!decoded) return jsonError(401, 'Invalid token')
+      var body = await request.json()
+      if (!body.api_key) return jsonError(400, 'Missing api_key')
+      var user = await getUserByApiKey(env, body.api_key)
+      if (!user) return jsonError(401, 'Invalid API key')
+      if (user.plan === 'none') return jsonError(403, 'No active plan. Purchase at https://shotlyapi.in/billing')
+      if (isTrialExpired(user)) return jsonError(403, 'Trial expired. Upgrade at https://shotlyapi.in/billing')
+      var oracleUrl = (env.ORACLE_SERVER_URL || 'http://localhost:3000') + '/api/screenshot/bulk'
+      var response = await fetch(oracleUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Server-Secret': env.SERVER_SECRET || '' }, body: JSON.stringify({body), signal: AbortSignal.timeout(120000) })
+      if (body.urls && Array.isArray(body.urls)) { for (var i = 0; i < body.urls.length; i++) { await logUsage(env, body.api_key, body.urls[i]) } }
+      var data = await response.json()
+      return jsonResponse(data)
+    }
+
+    // SCREENSHOT
+    if (path === '/api/screenshot' && request.method === 'GET') {
+      var params = getScreenshotParams(url)
+      if (!params.url && !params.custom_html) return jsonError(400, 'Missing required parameter: url or custom_html')
+      // Check Authorization header first, fall back to URL param for demo key only
+      var headerKey = null
+      var authHdr = request.headers.get('Authorization')
+      if (authHdr && authHdr.indexOf('Bearer ') === 0) headerKey = authHdr.replace('Bearer ', '')
+      var apiKey = headerKey || params.api_key
+      if (!apiKey) return jsonError(401, 'Missing required parameter: api_key. Use Authorization header or api_key URL param')
+      // If using URL param (not header), only allow the demo key
+      if (!headerKey && params.api_key && params.api_key !== 'demo-key-shotly') {
+        return jsonError(401, 'For security, API keys must be sent via Authorization header. Example: Authorization: Bearer sk_live_xxx')
+      }
+      var user = await getUserByApiKey(env, apiKey)
+      if (!user) return jsonError(401, 'Invalid API key. Get one at https://shotlyapi.in')
+      if (user.plan === 'none') return jsonError(403, 'No active plan. Purchase at https://shotlyapi.in/billing')
+      if (isTrialExpired(user)) return jsonError(403, 'Your 7-day Trial has expired. Upgrade at https://shotlyapi.in/billing')
+      var used = await getUsageCount(env, apiKey)
+      var limit = (PLANS[user.plan] && PLANS[user.plan].limit) || 0
+      if (used >= limit) return jsonError(403, 'Usage limit exceeded (' + used + '/' + limit + '). Upgrade at https://shotlyapi.in/billing')
+
+      if (params.extract_text === 'true') {
+        var oracleUrl = buildOracleUrl(env, params)
+        try {
+          var resp = await fetch(oracleUrl, { signal: AbortSignal.timeout(45000), headers: { 'X-Server-Secret': env.SERVER_SECRET || '' } })
+          if (!resp.ok) return jsonError(500, 'Text extraction failed.')
+          var tdata = await resp.json()
+          await logUsage(env, apiKey, params.url || 'custom_html')
+          return jsonResponse(tdata)
+        } catch (e) { return jsonError(500, 'Could not reach screenshot server.') }
+      }
+
+      var cacheKey = buildCacheKey(params)
+      if (env.SCREENSHOTS && params.fresh !== 'true') {
+        var cached = await env.SCREENSHOTS.get(cacheKey)
+        if (cached) {
+          await logUsage(env, apiKey, params.url || 'custom_html')
+          var ct = params.format === 'pdf' ? 'application/pdf' : 'image/' + params.format
+          return new Response(cached, { headers: { 'Content-Type': ct, 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': 'https://shotlyapi.in', 'Strict-Transport-Security': 'max-age=315536000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY' } })
+        }
+      }
+
+      var oracleUrl2 = buildOracleUrl(env, params)
+      try {
+        var resp2 = await fetch(oracleUrl2, { signal: AbortSignal.timeout(45000), headers: { 'X-Server-Secret': env.SERVER_SECRET || '' } })
+        if (!resp2.ok) return jsonError(500, 'Screenshot failed. The URLˆµ¥¡Ğ¹½Ğ‰”…•ÍÍ¥‰±”¸œ¤(€€€€€€€Ù…È¥µ…•	Õ™™•È€ô…İ…¥ĞÉ•ÍÀÈ¹…ÉÉ…å	Õ™™•È ¤(€€€€€€€¥˜€¡•¹Ø¹MI9M!=QL¤ì…İ…¥Ğ•¹Ø¹MI9M!=QL¹ÁÕĞ¡…¡•-•ä°¥µ…•	Õ™™•È°ìÕÍÑ½µ5•Ñ…‘…Ñ„èìÕÉ°èÁ…É…µÌ¹ÕÉ°ñğ€ÕÍÑ½µ}¡Ñµ°œ°É•…Ñ•è¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤ôô¤ô(€€€€€€€…İ…¥Ğ±½UÍ…”¡•¹Ø°…Á¥-•ä°Á…É…µÌ¹ÕÉ°ñğ€ÕÍÑ½µ}¡Ñµ°œ¤(€€€€€€€Ù…ÈĞÈ€ôÁ…É…µÌ¹™½Éµ…Ğ€ôôô€Á‘˜œ€ü€…ÁÁ±¥…Ñ¥½¸½Á‘˜œ€è€¥µ…”¼œ€¬Á…É…µÌ¹™½Éµ…Ğ(€€€€€€€É•ÑÕÉ¸¹•ÜI•ÍÁ½¹Í”¡¥µ…•	Õ™™•È°ì¡•…‘•ÉÌèì€½¹Ñ•¹ĞµQåÁ”œèĞÈ°€`µ…¡”œè€5%MLœ°€•ÍÌµ½¹ÑÉ½°µ±±½Üµ=É¥¥¸œè€¡ÑÑÁÌè¼½Í¡½Ñ±å…Á¤¹¥¸œ°€MÑÉ¥ĞµQÉ…¹ÍÁ½ÉĞµM•ÕÉ¥Ñäœè€µ…àµ…”ôÌÄÔÔÌØÀÀÀì¥¹±Õ‘•MÕ‰½µ…¥¹Ìœ°€`µ½¹Ñ•¹ĞµQåÁ”µ=ÁÑ¥½¹Ìœè€¹½Í¹¥™˜œ°€`µÉ…µ”µ=ÁÑ¥½¹Ìœè€9dœôô¤(€€€€€ô…Ñ €¡”¤ì(€€€€€€€É•ÑÕÉ¸©Í½¹ÉÉ½È ÔÀÀ°€½Õ±¹½ĞÉ•… ÍÉ••¹Í¡½ĞÍ•ÉÙ•È¸QÉä……¥¸¥¸„™•ÜÍ•½¹‘Ì¸œ¤(€€€€€ô(€€€ô((€€€É•ÑÕÉ¸©Í½¹ÉÉ½È ĞÀĞ°€9½Ğ™½Õ¹¸¡•¬‘½Ì…Ğ¡ÑÑÁÌè¼½Í¡½Ñ±å…Á¤¹¥¸½‘½Ìœ¤(€ô°)ô((

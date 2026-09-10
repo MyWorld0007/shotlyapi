@@ -200,11 +200,13 @@ export default function Billing() {
                   </>
                 ) : (
                   <>
-                    <div className="plan-name">{PLANS[currentPlan] ? PLANS[currentPlan].name : 'No Active Plan'} Plan</div>
+                    <div className="plan-name">{PLANS[currentPlan] ? PLANS[currentPlan].name : 'No Active Plan'}{PLANS[currentPlan] ? ' Plan' : ''}</div>
                     <div className="plan-price">
                       {PLANS[currentPlan] && PLANS[currentPlan].type === 'one_time'
                         ? formatPrice(PLANS[currentPlan].price) + ' one-time - ' + PLANS[currentPlan].limit + ' screenshots for ' + PLANS[currentPlan].duration
-                        : PLANS[currentPlan] ? formatPrice(PLANS[currentPlan].price) + '/mo - ' + PLANS[currentPlan].limit + ' screenshots per month' : ''
+                        : PLANS[currentPlan] && PLANS[currentPlan].type === 'free'
+                          ? 'Free - ' + PLANS[currentPlan].limit + ' screenshots total'
+                          : PLANS[currentPlan] ? formatPrice(PLANS[currentPlan].price) + '/mo - ' + PLANS[currentPlan].limit + ' screenshots per month' : ''
                       }
                       {usageData && usageData.trial_expired && currentPlan === 'trial' && (
                         <span style={{ color: '#ef4444', fontWeight: 600, marginLeft: '8px' }}>- EXPIRED</span>

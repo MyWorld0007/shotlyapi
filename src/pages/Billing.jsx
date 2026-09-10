@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import Navbar from '../components/Navbar'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -164,20 +165,7 @@ export default function Billing() {
 
   return (
     <>
-      <nav>
-        <div className="container nav-inner">
-          <Link to="/" className="logo">
-            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
-            ShotlyAPI
-          </Link>
-          <div className="nav-links">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/billing" className="active">Billing</Link>
-            <Link to="/docs">Docs</Link>
-            <button onClick={() => { logout(); navigate('/') }} className="btn btn-outline btn-sm">Sign Out</button>
-          </div>
-        </div>
-      </nav>
+      <Navbar variant="app" />
 
       <div className="dashboard">
         <div className="container">

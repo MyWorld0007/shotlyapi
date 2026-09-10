@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -93,21 +94,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <nav>
-        <div className="container nav-inner">
-          <Link to="/" className="logo">
-            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
-            ShotlyAPI
-          </Link>
-          <div className="nav-links">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/billing">Billing</Link>
-            <Link to="/docs">Docs</Link>
-            <button onClick={() => { logout(); navigate('/') }} className="btn btn-outline btn-sm">Sign Out</button>
-          </div>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-        </div>
-      </nav>
+      <Navbar variant="app" />
 
       <div className="dashboard">
         <div className="container">

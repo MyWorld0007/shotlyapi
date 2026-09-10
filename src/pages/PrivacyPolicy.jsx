@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const sections = [
   { id: 'introduction', label: 'Introduction' },
@@ -21,25 +22,7 @@ export default function PrivacyPolicy() {
   const { theme, toggleTheme } = useTheme()
   return (
     <div>
-      <nav>
-        <div className="nav-inner container">
-          <Link to="/" className="logo"><img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />ShotlyAPI</Link>
-          <div className="nav-links">
-            <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Features</Link>
-            <Link to="/docs" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Docs</Link>
-            <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Pricing</Link>
-          </div>
-          <div className="nav-actions">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            {user ? <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link> : (
-              <>
-                <Link to="/login" className="btn btn-outline btn-sm">Login</Link>
-                <Link to="/signup" className="btn btn-primary btn-sm">Get API Key</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="docs-page">
         <div className="docs-grid">
@@ -89,9 +72,9 @@ export default function PrivacyPolicy() {
             <h3 id="third-party">Third-Party Services</h3>
             <p>We use the following third-party services that may process your data:</p>
             <ul>
-              <li><strong>Cloudflare:</strong> Hosting, database (D1), object storage (R2), and edge compute (Workers)</li>
+              <li><strong>Cloudflare:</strong> Hosting, database (D1), object storage (R2), and edge compute (Workers),/li>
               <li><strong>Razorpay:</strong> Payment processing. Razorpay collects and processes payment data under their own privacy policy.</li>
-              <li><strong>Resend:</strong> Transactional email delivery (welcome emails, password resets)</li>
+              <li><strong>Resend:</strong> Transactional email delivery (welcome emails, password resets),/li>
               <li><strong>Oracle Cloud:</strong> Screenshot rendering server running Chromium</li>
             </ul>
 

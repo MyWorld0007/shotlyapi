@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -46,6 +47,8 @@ export default function Signup() {
   }
 
   return (
+    <>
+    <Navbar />
     <div className="auth-page">
       <div className="auth-card">
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
@@ -74,5 +77,6 @@ export default function Signup() {
         </div>
       </div>
     </div>
+  </>
   )
 }

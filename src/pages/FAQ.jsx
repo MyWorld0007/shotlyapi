@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const faqs = [
   { q: 'What is a screenshot API?', a: 'A screenshot API is a service that programmatically captures visual snapshots of web pages. Instead of running a headless browser yourself, you send a simple HTTP request and receive a high-quality image or PDF of the target website in return.' },
@@ -9,83 +10,4 @@ const faqs = [
   { q: 'Is there a free tier?', a: 'Yes. Our free tier includes 50 screenshots per month at no cost, with no credit card required. It is perfect for testing, personal projects, and small-scale usage. You can upgrade to a paid plan anytime for higher limits.' },
   { q: 'What image formats are supported?', a: 'ShotlyAPI supports PNG, JPEG, and WEBP image formats, plus PDF document export. You can specify the desired format via the format query parameter in your API request.' },
   { q: 'How fast is the API?', a: 'Our average response time is under 3 seconds for fresh captures. Cached screenshots return in under 500ms. Our global edge network ensures low latency regardless of your geographic location.' },
-  { q: 'Can I capture full-page screenshots?', a: 'Yes! ShotlyAPI captures the entire scrollable page, not just the visible viewport. This is perfect for archiving long articles, landing pages, and documentation sites.' },
-  { q: 'Do you cache screenshots?', a: 'Yes. We cache screenshots in Cloudflare R2 storage. When you request a screenshot of a URL that has been recently captured, we serve it instantly from cache â€” typically in under 500ms.' },
-  { q: 'Is my API key secure?', a: 'Your API key is unique to your account and should be kept secret. All API requests are made over HTTPS. We never log or expose your API key. If your key is compromised, you can regenerate it from your dashboard.' },
-  { q: 'Can I use screenshots commercially?', a: 'Absolutely. ShotlyAPI is designed for commercial use. All paid plans include a commercial license. You are responsible for ensuring you have the right to capture and use screenshots of third-party websites.' },
-  { q: 'How do I upgrade my plan?', a: 'Log in to your dashboard, go to the Billing page, and select the plan you want to upgrade to. Payment is processed securely through Razorpay. Your new limits take effect immediately after payment.' },
-]
-
-export default function FAQ() {
-  const { user } = useAuth()
-  const [openIndex, setOpenIndex] = useState(0)
-  const { theme, toggleTheme } = useTheme()
-
-  return (
-    <div>
-      <nav>
-        <div className="nav-inner container">
-          <Link to="/" className="logo"><img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />ShotlyAPI</Link>
-          <div className="nav-links">
-            <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Features</Link>
-            <Link to="/docs" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Docs</Link>
-            <Link to="/" style={{ color: 'var(--text-dim)', fontSize: '15px', fontWeight: 500, textDecoration: 'none' }}>Pricing</Link>
-          </div>
-          <div className="nav-actions">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            {user ? <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link> : (
-              <>
-                <Link to="/login" className="btn btn-outline btn-sm">Login</Link>
-                <Link to="/signup" className="btn btn-primary btn-sm">Get API Key</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      <div style={{ padding: '80px 24px', maxWidth: '760px', margin: '0 auto' }}>
-        <h2 className="section-title">Frequently Asked Questions</h2>
-        <p className="section-sub">Everything you need to know about ShotlyAPI.</p>
-        <div className="faq-list" style={{ marginTop: '32px' }}>
-          {faqs.map((item, index) => (
-            <div className="faq-item" key={item.q}>
-              <button className="faq-question" onClick={() => setOpenIndex(openIndex === index ? -1 : index)} type="button">
-                {item.q}
-                <span className="faq-toggle">{openIndex === index ? '\u2212' : '+'}</span>
-              </button>
-              {openIndex === index && <div className="faq-answer">{item.a}</div>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <footer>
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-col">
-              <Link to="/" className="logo" style={{ marginBottom: '12px' }}><img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />ShotlyAPI</Link>
-              <p>The fastest way to capture website screenshots and PDFs via API.</p>
-            </div>
-            <div className="footer-col">
-              <h4>Product</h4>
-              <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Features</Link>
-              <Link to="/" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Pricing</Link>
-              <Link to="/faq" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>FAQ</Link>
-            </div>
-            <div className="footer-col">
-              <h4>Developers</h4>
-              <Link to="/docs" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>API Docs</Link>
-              <a href="https://api.shotlyapi.in/health" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>API Status</a>
-            </div>
-            <div className="footer-col">
-              <h4>Company</h4>
-              <Link to="/privacy" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Privacy Policy</Link>
-              <Link to="/terms" style={{ display: 'block', color: 'var(--text-mute)', fontSize: '14px', padding: '4px 0', textDecoration: 'none' }}>Terms & Conditions</Link>
-            </div>
-          </div>
-          <div className="footer-bottom"><p>{'\u00A9'} 2026 ShotlyAPI. Built with Cloudflare Workers, D1, and R2.</p></div>
-        </div>
-      </footer>
-    </div>
-  )
-}
+  { q: 'Can I capture full-page screenshots?', a: 'Yes! ShotlyAPI captures the entire scrollable page, not juÍĞÑ¡”Ù¥Í¥‰±”Ù¥•İÁ½ÉĞ¸Q¡¥Ì¥ÌÁ•É™•Ğ™½È…É¡¥Ù¥¹œ±½¹œ…ÉÑ¥±•Ì°±…¹‘¥¹œÁ…•Ì°…¹‘½Õµ•¹Ñ…Ñ¥½¸Í¥Ñ•Ì¸œô°(€ìÄè€¼å½Ô…¡”ÍÉ••¹Í¡½ÑÌüœ°„è€e•Ì¸]”…¡”ÍÉ••¹Í¡½ÑÌ¥¸±½Õ‘™±…É”ÈÍÑ½É…”¸]¡•¸å½ÔÉ•ÅÕ•ÍĞ„ÍÉ••¹Í¡½Ğ½˜„UI0Ñ¡…Ğ¡…Ì‰••¸É••¹Ñ±ä…ÁÑÕÉ•°İ”Í•ÉÙ”¥Ğ¥¹ÍÑ…¹Ñ±ä™É½´…¡”ƒŠSâG—–6ÆÇ’–âVæFW"S×2ârÒÀ¢²¢t—2×’’¶W’6V7W&SòrÂ¢u–÷W"’¶W’—2Væ—VRFò–÷W"66÷VçBæB6†÷VÆB&R¶WB6V7&WBâÆÂ’&WVW7G2&RÖFR÷fW"…EE2âvRæWfW"Æör÷"W‡÷6R–÷W"’¶W’â–b–÷W"¶W’—26ö×&öÖ—6VBÂ–÷R6â&VvVæW&FR—Bg&öÒ–÷W"F6†&ö&BârÒÀ¢²¢t6â’W6R67&VVç6†÷G26öÖÖW&6–ÆÇ“òrÂ¢t'6öÇWFVÇ’â6†÷FÇ”’—2FW6–væVBf÷"6öÖÖW&6–ÂW6RâÆÂ–BÆç2–æ6ÇVFR6öÖÖW&6–ÂÆ–6Vç6Râ–÷R&R&W7öç6–&ÆRf÷"Vç7W&–ær–÷R†fRF†R&–v‡BFò6GW&RæBW6R67&VVç6†÷G2öbF†—&B×'G’vV'6—FW2ârÒÀ¢²¢t†÷rFò’Ww&FR×’ÆãòrÂ¢tÆör–âFò–÷W"F6†&ö&BÂvòFòF†R&–ÆÆ–ærvRÂæB6VÆV7BF†RÆâ–÷RvçBFòWw&FRFòâ–ÖVçB—2&ö6W76VB6V7W&VÇ’F‡&÷Vv‚&¦÷'’â–÷W"æWrÆ–Ö—G2F¶RVffV7B–ÖÖVF–FVÇ’gFW"–ÖVçBârÒÀ¥Ğ ¦W‡÷'BFVfVÇBgVæ7F–öâd‚’°¢6öç7B²W6W"ÒÒW6TWF‚‚¢6öç7B¶÷Vä–æFW‚Â6WD÷Vä–æFW…ÒÒW6U7FFRƒ¢6öç7B²F†VÖRÂFövvÆUF†VÖRÒÒW6UF†VÖR‚ ¢&WGW&â€¢ÆF—cà¢Äæf&"óà ¢ÆF—b7G–ÆS×·²FF–æs¢sƒ‚#G‚rÂÖ…v–GFƒ¢ssc‚rÂÖ&v–ã¢sWFòr×Óà¢Æƒ"6Æ74æÖSÒ'6V7F–öâ×F—FÆR#äg&WVVçFÇ’6¶VBVW7F–öç3Âöƒ#à¢Ç6Æ74æÖSÒ'6V7F–öâ×7V"#äWfW'—F†–ær–÷RæVVBFò¶æ÷r&÷WB6†÷FÇ”’ãÂ÷à¢ÆF—b6Æ74æÖSÒ&fÖÆ—7B"7G–ÆS×·²Ö&v–åF÷¢s3'‚r×Óà¢¶f2æÖ‚†—FVÒÂ–æFW‚’Óâ€¢ÆF—b6Æ74æÖSÒ&fÖ—FVÒ"¶W“×¶—FVÒçÓà¢Æ'WGFöâ6Æ74æÖSÒ&f×VW7F–öâ"öä6Æ–6³×²‚’Óâ6WD÷Vä–æFW‚†÷Vä–æFW‚ÓÓÒ–æFW‚òÓ¢–æFW‚—ÒG—SÒ&'WGFöâ#à¢¶—FVÒçĞ¢Ç7â6Æ74æÖSÒ&f×FövvÆR#ç¶÷Vä–æFW‚ÓÓÒ–æFW‚òuÇS##"r¢r²wÓÂ÷7ãà¢Âö'WGFöãà¢¶÷Vä–æFW‚ÓÓÒ–æFW‚bbÆF—b6Æ74æÖSÒ&fÖç7vW"#ç¶—FVÒæÓÂöF—cçĞ¢ÂöF—cà¢’—Ğ¢ÂöF—cà¢ÂöF—cà ¢Æfö÷FW#à¢ÆF—b6Æ74æÖSÒ&6öçF–æW"#à¢ÆF—b6Æ74æÖSÒ&fö÷FW"Öw&–B#à¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö6öÂ#à¢ÄÆ–æ²FóÒ"ò"6Æ74æÖSÒ&Æövò"7G–ÆS×·²Ö&v–ä&÷GFöÓ¢s'‚r×ÓãÆ–Ör7&3Ò"öÆövòç7fr"ÇCÒ%6†÷FÇ”’"7G–ÆS×··v–GFƒ¢s3'‚rÂ†V–v‡C¢s3'‚rÂ&÷&FW%&F—W3¢s‡‚w×Òóå6†÷FÇ”“ÂôÆ–æ³à¢ÇåF†Rf7FW7Bv’Fò6GW&RvV'6—FR67&VVç6†÷G2æBDg2f–’ãÂ÷à¢ÂöF—cà¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö6öÂ#à¢ÆƒCå&öGV7CÂöƒCà¢ÄÆ–æ²FóÒ"ò"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×ÓäfVGW&W3ÂôÆ–æ³à¢ÄÆ–æ²FóÒ"ò"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×Óå&–6–æsÂôÆ–æ³à¢ÄÆ–æ²FóÒ"öf"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×ÓädÂôÆ–æ³à¢ÂöF—cà¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö6öÂ#à¢ÆƒCäFWfVÆ÷W'3ÂöƒCà¢ÄÆ–æ²FóÒ"öFö72"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×Óä’Fö73ÂôÆ–æ³à¢Æ‡&VcÒ&‡GG3¢òö’ç6†÷FÇ–’æ–âö†VÇF‚"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×Óä’7FGW3Âöà¢ÂöF—cà¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö6öÂ#à¢ÆƒCä6ö×ç“ÂöƒCà¢ÄÆ–æ²FóÒ"÷&—f7’"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×Óå&—f7’öÆ–7“ÂôÆ–æ³à¢ÄÆ–æ²FóÒ"÷FW&×2"7G–ÆS×·²F—7Æ“¢v&Æö6²rÂ6öÆ÷#¢wf"‚Ò×FW‡BÖ×WFR’rÂföçE6—¦S¢sG‚rÂFF–æs¢sG‚rÂFW‡DFV6÷&F–öã¢væöæRr×ÓåFW&×2b6öæF—F–öç3ÂôÆ–æ³à¢ÂöF—cà¢ÂöF—cà¢ÆF—b6Æ74æÖSÒ&fö÷FW"Ö&÷GFöÒ#ãÇç²qÇS’wÒ##b6†÷FÇ”’â'V–ÇBv—F‚6Æ÷VFfÆ&Rv÷&¶W'2ÂCÂæB#"ãÂ÷ãÂöF—cà¢ÂöF—cà¢Âöfö÷FW#à¢ÂöF—cà¢§Ğ

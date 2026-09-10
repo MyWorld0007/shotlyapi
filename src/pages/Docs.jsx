@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 export default function Docs() {
   const { user } = useAuth()
@@ -9,28 +10,7 @@ export default function Docs() {
 
   return (
     <>
-      <nav>
-        <div className="container nav-inner">
-          <Link to="/" className="logo">
-            <img src="/logo.svg" alt="ShotlyAPI" style={{width: '32px', height: '32px', borderRadius: '8px'}} />
-            ShotlyAPI
-          </Link>
-          <div className="nav-links">
-            <a href="/#features">Features</a>
-            <Link to="/docs">Docs</Link>
-            <a href="/#pricing">Pricing</a>
-            {user ? (
-              <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard</Link>
-            ) : (
-              <>
-                <Link to="/login" className="btn btn-outline btn-sm">Sign In</Link>
-                <Link to="/signup" className="btn btn-primary btn-sm">Get API Key</Link>
-              </>
-            )}
-          </div>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="docs-page">
         <div className="container">

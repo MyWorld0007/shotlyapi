@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme, ThemeToggle } from '../lib/ThemeToggle'
+import Navbar from '../components/Navbar'
 
 const API_URL = 'https://api.shotlyapi.in'
 
@@ -34,6 +35,8 @@ export default function ForgotPassword() {
   }
 
   return (
+    <>
+    <Navbar />
     <div className="auth-page">
       <div className="auth-card">
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
@@ -42,8 +45,7 @@ export default function ForgotPassword() {
           ShotlyAPI
         </Link>
         <h2>Forgot password?</h2>
-        {sent ? (
-          <div style={{ textAlign: 'center' }}>
+        {sent ? (i          <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--green)', marginBottom: '20px', fontSize: '16px' }}>
               ✓ If the email exists, a reset link has been sent.
             </p>
@@ -72,5 +74,6 @@ export default function ForgotPassword() {
         </div>
       </div>
     </div>
+  </>
   )
 }

@@ -45,7 +45,8 @@ export default function ForgotPassword() {
           ShotlyAPI
         </Link>
         <h2>Forgot password?</h2>
-        {sent ? (i          <div style={{ textAlign: 'center' }}>
+        {sent ? (
+          <div style={{ textAlign: 'center' }}>
             <p style={{ color: 'var(--green)', marginBottom: '20px', fontSize: '16px' }}>
               ✓ If the email exists, a reset link has been sent.
             </p>

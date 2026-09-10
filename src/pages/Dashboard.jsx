@@ -179,7 +179,7 @@ export default function Dashboard() {
                   marginBottom: '24px',
                   fontSize: '14px'
                 }}>
-                  <strong>Trial active</strong> Ã¢ÂÂ Expires on {stats.trial_expires_at}. 
+                  <strong>Trial active</strong> \u2014 Expires on {stats.trial_expires_at}.
                   You have {planLimit - stats.used} screenshots remaining.
                 </div>
               )}
@@ -220,7 +220,7 @@ export default function Dashboard() {
                   <tbody>
                     {recent.map((r, i) => (
                       <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={{ padding: '8)Ã', fontSize: '14px', fontFamily: 'var(--mono)' }}>{r.url}</td>
+                        <td style={{ padding: '8px', fontSize: '14px', fontFamily: 'var(--mono)' }}>{r.url}</td>
                         <td style={{ padding: '8px', fontSize: '14px', color: 'var(--text-dim)' }}>{r.timestamp}</td>
                       </tr>
                     ))}

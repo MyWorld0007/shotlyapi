@@ -2,6 +2,7 @@
 // Trial: Rs.99 one-time | Starter: Rs.499/mo | Growth: Rs.899/mo | Pro: Rs.1799/mo
 
 const PLANS = {
+  free:    { name: 'Free',    price: 0,    limit: 20,     type: 'free' },
   trial:   { name: 'Trial',   price: 99,  limit: 100,   type: 'one_time', duration_days: 7 },
   starter: { name: 'Starter', price: 499, limit: 2000,  type: 'subscription' },
   growth:  { name: 'Growth',  price: 899, limit: 4000,  type: 'subscription' },
@@ -292,7 +293,7 @@ export default {
       var userId = generateId()
       var jwtSecret = env.JWT_SECRET
       var token = await makeJWT({ uid: userId, email: body.email, iat: Date.now() }, jwtSecret)
-      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, apiKeyHash, apiKeyDisplayVal, 'none', new Date().toISOString()).run()
+      await env.DB.prepare('INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash, api_key_display, plan, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(userId, body.email, hashedPw, salt, apiKey, apiKeyHash, apiKeyDisplayVal, 'free', new Date().toISOString()).run()
       ctx.waitUntil(sendWelcomeEmail(env, body.email))
       return jsonResponse({ token: token, api_key: apiKey, api_key_display: apiKeyDisplayVal, email: body.email }, 200, { 'Set-Cookie': setAuthCookie(token) })
      } catch (signupErr) {
@@ -525,7 +526,7 @@ export default {
         var subId3 = (body.payload && body.payload.subscription && body.payload.subscription.entity) ? body.payload.subscription.entity.id : null
         if (subId3) {
           var user3 = await env.DB.prepare('SELECT * FROM users WHERE subscription_id = ?').bind(subId3).first()
-          if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('none', user3.id).run() }
+          if (user3) { await env.DB.prepare('UPDATE users SET plan = ? WHERE id = ?').bind('free', user3.id).run() }
         }
       }
       return jsonResponse({ received: true })

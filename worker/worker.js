@@ -889,6 +889,69 @@ export default {
     }
 
 // ============ END ADMIN SECTION ============
+    // PUBLIC: FEEDBACK SUBMISSION
+    if (path === '/api/feedback' && request.method === 'POST') {
+      try {
+        await env.DB.prepare(
+          "CREATE TABLE IF NOT EXISTS feedback (id TEXT PRIMARY KEY, user_id TEXT, email TEXT DEFAULT '', rating INTEGER NOT NULL, category TEXT DEFAULT 'other', message TEXT NOT NULL, ip TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')))"
+        ).run()
+
+        var fbIP = getClientIP(request)
+        var fbRecent = await env.DB.prepare(
+          "SELECT COUNT(*) as count FROM feedback WHERE ip = ? AND created_at >= datetime('now', '-15 minutes')"
+        ).bind(fbIP).first()
+        if (fbRecent && fbRecent.count >= 5) return jsonError(429, 'Too many submissions. Please try again later.')
+
+        var fbBody = await request.json()
+        var fbRating = parseInt(fbBody.rating, 10)
+        if (!fbRating || fbRating < 1 || fbRating > 5) return jsonError(400, 'Rating is required (1-5)')
+        var fbMessage = String(fbBody.message || '').trim()
+        if (!fbMessage) return jsonError(400, 'Message is required')
+        if (fbMessage.length > 2000) return jsonError(400, 'Message too long (max 2000 characters)')
+        var fbCategory = ['bug', 'feature', 'general', 'pricing', 'docs', 'other'].indexOf(fbBody.category) >= 0 ? fbBody.category : 'other'
+
+        var fbEmail = ''
+        var fbUserId = null
+        try {
+          var fbToken = getTokenFromRequest(request)
+          if (fbToken) {
+            var fbDecoded = await verifyJWT(fbToken, env.JWT_SECRET)
+            if (fbDecoded) {
+              fbUserId = fbDecoded.uid
+              var fbUser = await env.DB.prepare('SELECT email FROM users WHERE id = ?').bind(fbDecoded.uid).first()
+              if (fbUser) fbEmail = fbUser.email
+            }
+          }
+        } catch (e3) {}
+        if (!fbEmail && fbBody.email) fbEmail = String(fbBody.email).trim().slice(0, 200)
+
+        await env.DB.prepare(
+          'INSERT INTO feedback (id, user_id, email, rating, category, message, ip) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).bind(generateId(), fbUserId, fbEmail, fbRating, fbCategory, fbMessage, fbIP).run()
+
+        return jsonResponse({ success: true })
+      } catch (e) {
+        return jsonError(500, 'Failed to submit feedback. Please try again.')
+      }
+    }
+
+    // ADMIN: LIST FEEDBACK
+    if (path === '/api/admin/feedback' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var fbList = await env.DB.prepare(
+          'SELECT f.id, f.rating, f.category, f.message, f.created_at, COALESCE(f.email, u.email) as email FROM feedback f LEFT JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC LIMIT 100'
+        ).all()
+        var fbStats = await env.DB.prepare('SELECT COUNT(*) as total, ROUND(AVG(rating), 2) as avg_rating FROM feedback').first()
+        return jsonResponse({
+          feedback: fbList.results || [],
+          stats: { total: fbStats ? fbStats.total : 0, avg_rating: fbStats ? fbStats.avg_rating : 0 }
+        })
+      } catch (e) {
+        return jsonError(500, 'Failed to load feedback')
+      }
+    }
 
     return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
   },

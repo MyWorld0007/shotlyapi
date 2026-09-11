@@ -742,12 +742,13 @@ export default {
         query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
         binds.push(limit, offset)
         var stmt = env.DB.prepare(query)
-        for (var b of binds) stmt = stmt.bind(b)
+        if (binds.length > 0) stmt = stmt.bind.apply(stmt, binds)
         var users = await stmt.all()
         var countQuery = 'SELECT COUNT(*) as count FROM users'
         if (conditions.length > 0) countQuery += ' WHERE ' + conditions.join(' AND ')
         var countStmt = env.DB.prepare(countQuery)
-        for (var b2 of binds.slice(0, binds.length - 2)) countStmt = countStmt.bind(b2)
+        var countBinds = binds.slice(0, binds.length - 2)
+        if (countBinds.length > 0) countStmt = countStmt.bind.apply(countStmt, countBinds)
         var total = await countStmt.first()
         return jsonResponse({ users: users.results || [], total: total.count, page: page, pages: Math.ceil(total.count / limit) })
       } catch(e) {

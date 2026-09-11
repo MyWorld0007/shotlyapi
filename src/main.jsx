@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard'
 import Billing from './pages/Billing'
 import Docs from './pages/Docs'
 import FAQ from './pages/FAQ'
+import Feedback from './pages/Feedback'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
 import AdminLogin from './pages/AdminLogin'
@@ -35,6 +36,7 @@ root.render(
           <Route path="/billing" element={<Billing />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/feedback" element={<Feedback />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/admin/login" element={<AdminLogin />} />

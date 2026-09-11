@@ -55,6 +55,7 @@ export default function Navbar({ variant = 'marketing' }) {
               <Link to="/docs">Docs</Link>
               <a href="/#pricing">Pricing</a>
               <Link to="/faq">FAQ</Link>
+              <Link to="/feedback">Feedback</Link>
             </>
           )}
           {variant === 'app' && (
@@ -62,6 +63,7 @@ export default function Navbar({ variant = 'marketing' }) {
               <Link to="/dashboard" className={isActive('/dashboard') ? 'nav-link-active' : ''}>Dashboard</Link>
               <Link to="/billing" className={isActive('/billing') ? 'nav-link-active' : ''}>Billing</Link>
               <Link to="/docs">Docs</Link>
+              <Link to="/feedback">Feedback</Link>
             </>
           )}
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
@@ -99,6 +101,7 @@ export default function Navbar({ variant = 'marketing' }) {
             <Link to="/docs">Docs</Link>
             <a href="/#pricing">Pricing</a>
             <Link to="/faq">FAQ</Link>
+            <Link to="/feedback">Feedback</Link>
           </>
         )}
         {variant === 'app' && (
@@ -106,6 +109,7 @@ export default function Navbar({ variant = 'marketing' }) {
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/billing">Billing</Link>
             <Link to="/docs">Docs</Link>
+            <Link to="/feedback">Feedback</Link>
           </>
         )}
         <div className="nav-mobile-divider"></div>

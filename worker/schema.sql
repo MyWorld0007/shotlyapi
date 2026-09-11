@@ -3,6 +3,7 @@
 -- NOTE: the DROP statements below WIPE existing data. To migrate an existing DB
 -- incrementally, run only the missing CREATE TABLE / ALTER statements instead.
 
+DROP TABLE IF EXISTS feedback;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS page_views;
 DROP TABLE IF EXISTS login_attempts;
@@ -11,8 +12,8 @@ DROP TABLE IF EXISTS users;
 
 -- Users table.
 -- Columns must match every column the worker writes in
---   INSERT INTO users (id, email, password_hash, salt, api_key, api_key_hash,
---                      api_key_display, plan, created_at)
+--   INSERT INTO users (id, email, password_hash, salt, api_key,
+--                      api_key_hash, api_key_display, plan, created_at)
 CREATE TABLE users (
   id                TEXT PRIMARY KEY,
   email             TEXT UNIQUE NOT NULL,
@@ -71,6 +72,23 @@ CREATE TABLE page_views (
 CREATE INDEX idx_page_views_created_at ON page_views(created_at);
 CREATE INDEX idx_page_views_session_id ON page_views(session_id);
 CREATE INDEX idx_page_views_page       ON page_views(page);
+
+-- User feedback submitted from the /feedback page.
+-- The worker also runs CREATE TABLE IF NOT EXISTS for this table, so it
+-- self-heals if it is missing from an existing database.
+CREATE TABLE feedback (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT,
+  email      TEXT DEFAULT '',
+  rating     INTEGER NOT NULL,
+  category   TEXT DEFAULT 'other',
+  message    TEXT NOT NULL,
+  ip         TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX idx_feedback_created_at ON feedback(created_at);
+CREATE INDEX idx_feedback_user_id    ON feedback(user_id);
 
 -- Payments. status is one of: 'created', 'captured', 'failed'.
 CREATE TABLE payments (

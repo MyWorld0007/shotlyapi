@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [plans, setPlans] = useState([])
   const [health, setHealth] = useState(null)
   const [failedPayments, setFailedPayments] = useState([])
+  const [feedback, setFeedback] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [userFilter, setUserFilter] = useState({ plan: '', search: '', page: 1 })
@@ -45,45 +46,75 @@ export default function AdminDashboard() {
   }, [fetchAPI])
 
   async function loadUsers() {
-    const params = new URLSearchParams()
-    if (userFilter.plan) params.set('plan', userFilter.plan)
-    if (userFilter.search) params.set('search', userFilter.search)
-    params.set('page', userFilter.page)
-    const result = await fetchAPI('/api/admin/users?' + params.toString())
-    if (result) setUsers(result)
+    try {
+      const params = new URLSearchParams()
+      if (userFilter.plan) params.set('plan', userFilter.plan)
+      if (userFilter.search) params.set('search', userFilter.search)
+      params.set('page', userFilter.page)
+      const result = await fetchAPI('/api/admin/users?' + params.toString())
+      if (result) setUsers(result)
+    } catch(e) {
+      alert('Failed to load users: ' + e.message)
+    }
   }
 
   async function loadSales() {
-    const result = await fetchAPI('/api/admin/sales')
-    if (result) setSales(result)
-    const failed = await fetchAPI('/api/admin/sales/failed')
-    if (failed) setFailedPayments(failed.failed_payments || [])
+    try {
+      const result = await fetchAPI('/api/admin/sales')
+      if (result) setSales(result)
+      const failed = await fetchAPI('/api/admin/sales/failed')
+      if (failed) setFailedPayments(failed.failed_payments || [])
+    } catch(e) {
+      alert('Failed to load sales: ' + e.message)
+    }
   }
 
   async function loadTraffic() {
-    const result = await fetchAPI('/api/admin/traffic')
-    if (result) setTraffic(result)
-    const pages = await fetchAPI('/api/admin/traffic/pages')
-    if (pages) setPageTraffic(pages.pages || [])
+    try {
+      const result = await fetchAPI('/api/admin/traffic')
+      if (result) setTraffic(result)
+      const pages = await fetchAPI('/api/admin/traffic/pages')
+      if (pages) setPageTraffic(pages.pages || [])
+    } catch(e) {
+      alert('Failed to load traffic: ' + e.message)
+    }
   }
 
   async function loadPlans() {
-    const result = await fetchAPI('/api/admin/plans')
-    if (result) setPlans(result.plans || [])
+    try {
+      const result = await fetchAPI('/api/admin/plans')
+      if (result) setPlans(result.plans || [])
+    } catch(e) {
+      alert('Failed to load plans: ' + e.message)
+    }
   }
 
   async function loadHealth() {
-    const result = await fetchAPI('/api/admin/health')
-    if (result) setHealth(result)
+    try {
+      const result = await fetchAPI('/api/admin/health')
+      if (result) setHealth(result)
+    } catch(e) {
+      alert('Failed to load health: ' + e.message)
+    }
+  }
+
+  async function loadFeedback() {
+    try {
+      const result = await fetchAPI('/api/admin/feedback')
+      if (result) setFeedback(result)
+    } catch(e) {
+      alert('Failed to load feedback: ' + e.message)
+    }
   }
 
   async function handleTabChange(newTab) {
     setTab(newTab)
-    if (newTab === 'users' && users.length === 0) loadUsers()
+    if (newTab === 'users' && (!users || !users.users)) loadUsers()
     if (newTab === 'sales' && !sales) loadSales()
     if (newTab === 'traffic' && !traffic) loadTraffic()
     if (newTab === 'plans' && plans.length === 0) loadPlans()
     if (newTab === 'health' && !health) loadHealth()
+    if (newTab === 'feedback' && !feedback) loadFeedback()
   }
 
   async function suspendUser(userId, suspend) {
@@ -119,8 +150,8 @@ export default function AdminDashboard() {
   if (loading) return React.createElement('div', { style: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f1117', color: '#8b92a5' } }, 'Loading admin dashboard...')
   if (error) return React.createElement('div', { style: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f1117', color: '#ef4444' } }, error)
 
-  const tabs = ['overview', 'users', 'sales', 'traffic', 'plans', 'health']
-  const tabLabels = { overview: 'Overview', users: 'Users', sales: 'Sales', traffic: 'Traffic', plans: 'Plans', health: 'Health' }
+  const tabs = ['overview', 'users', 'sales', 'traffic', 'plans', 'health', 'feedback']
+  const tabLabels = { overview: 'Overview', users: 'Users', sales: 'Sales', traffic: 'Traffic', plans: 'Plans', health: 'Health', feedback: 'Feedback' }
 
   return React.createElement('div', { style: { minHeight: '100vh', background: '#0f1117', color: '#e4e7ee', fontFamily: 'Outfit, sans-serif' } },
     // Nav bar
@@ -405,6 +436,43 @@ export default function AdminDashboard() {
             React.createElement('p', { style: { fontSize: '16px', fontWeight: 600 } }, new Date(health.timestamp).toLocaleString())
           )
         )
+      ),
+
+      // FEEDBACK TAB
+      tab === 'feedback' && React.createElement('div', null,
+        !feedback
+          ? React.createElement('p', { style: { color: '#8b92a5', fontSize: '13px' } }, 'Loading feedback...')
+          : React.createElement('div', null,
+            React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' } },
+              kpiCard('Total Feedback', (feedback.stats && feedback.stats.total) || 0, '#6366f1'),
+              kpiCard('Avg Rating', ((feedback.stats && feedback.stats.avg_rating) || 0) + ' / 5', '#f59e0b')
+            ),
+            React.createElement('div', { style: { background: '#181b24', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', overflow: 'hidden' } },
+              React.createElement('table', { style: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' } },
+                React.createElement('thead', null,
+                  React.createElement('tr', { style: { borderBottom: '1px solid rgba(255,255,255,0.06)' } },
+                    React.createElement('th', { style: thStyle }, 'Rating'),
+                    React.createElement('th', { style: thStyle }, 'Category'),
+                    React.createElement('th', { style: thStyle }, 'Email'),
+                    React.createElement('th', { style: thStyle }, 'Message'),
+                    React.createElement('th', { style: thStyle }, 'Date')
+                  )
+                ),
+                React.createElement('tbody', null,
+                  (feedback.feedback || []).length === 0
+                    ? React.createElement('tr', null, React.createElement('td', { colSpan: 5, style: { ...tdStyle, textAlign: 'center', color: '#8b92a5' } }, 'No feedback submitted yet.'))
+                    : (feedback.feedback || []).map((f, i) => React.createElement('tr', { key: i, style: { borderBottom: '1px solid rgba(255,255,255,0.04)' } },
+                        React.createElement('td', { style: tdStyle }, '\u2605'.repeat(f.rating || 0) + ' ' + (f.rating || 0) + '/5'),
+                        React.createElement('td', { style: tdStyle }, React.createElement('span', { style: categoryBadge(f.category) }, f.category)),
+                        React.createElement('td', { style: tdStyle }, f.email || 'Anonymous'),
+                        React.createElement('td', { style: { ...tdStyle, maxWidth: '400px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' } }, f.message),
+                        React.createElement('td', { style: tdStyle }, String(f.created_at || '').substring(0, 16))
+                      ))
+                )
+              )
+            ),
+            React.createElement('button', { onClick: loadFeedback, style: { marginTop: '16px', padding: '10px 20px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '8px', color: '#fff', cursor: 'pointer', fontSize: '13px', fontWeight: 600 } }, 'Refresh')
+          )
       )
     )
   )
@@ -431,6 +499,12 @@ function planBar(label, count, color) {
 function planBadge(plan) {
   var colors = { trial: '#f59e0b', starter: '#6366f1', growth: '#14b8a6', pro: '#22c55e', none: '#6b7280', demo: '#8b5cf6', admin: '#ec4899' }
   var c = colors[plan] || '#6b7280'
+  return { padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600, background: c + '20', color: c, textTransform: 'capitalize' }
+}
+
+function categoryBadge(category) {
+  var colors = { bug: '#ef4444', feature: '#6366f1', general: '#14b8a6', pricing: '#f59e0b', docs: '#0ea5e9', other: '#6b7280' }
+  var c = colors[category] || '#6b7280'
   return { padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600, background: c + '20', color: c, textTransform: 'capitalize' }
 }
 

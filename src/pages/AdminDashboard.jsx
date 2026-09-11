@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [health, setHealth] = useState(null)
   const [failedPayments, setFailedPayments] = useState([])
   const [feedback, setFeedback] = useState(null)
+  const [maintenance, setMaintenance] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [userFilter, setUserFilter] = useState({ plan: '', search: '', page: 1 })
@@ -107,6 +108,13 @@ export default function AdminDashboard() {
     }
   }
 
+  async function loadMaintenance() {
+    try {
+      const result = await fetchAPI('/api/maintenance')
+      if (result) setMaintenance(!!result.maintenance)
+    } catch(e) {}
+  }
+
   async function handleTabChange(newTab) {
     setTab(newTab)
     if (newTab === 'users' && (!users || !users.users)) loadUsers()
@@ -114,6 +122,7 @@ export default function AdminDashboard() {
     if (newTab === 'traffic' && !traffic) loadTraffic()
     if (newTab === 'plans' && plans.length === 0) loadPlans()
     if (newTab === 'health' && !health) loadHealth()
+    if (newTab === 'health') loadMaintenance()
     if (newTab === 'feedback' && !feedback) loadFeedback()
   }
 
@@ -145,6 +154,28 @@ export default function AdminDashboard() {
   async function adminLogout() {
     await fetch(`${API_URL}/api/admin/logout`, { method: 'POST', credentials: 'include' })
     navigate('/admin/login')
+  }
+
+  async function toggleMaintenance() {
+    const enable = !maintenance
+    const confirmed = window.confirm(enable
+      ? 'Enable Maintenance Mode?\n\nAll users will be logged out immediately and the website will be paused. Users will see a maintenance page. You can disable it anytime from this tab.'
+      : 'Disable Maintenance Mode and bring the website back online?')
+    if (!confirmed) return
+    try {
+      const resp = await fetch(`${API_URL}/api/admin/maintenance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ enabled: enable })
+      })
+      const data = await resp.json().catch(() => ({}))
+      if (!resp.ok) throw new Error(data.error || 'Request failed')
+      setMaintenance(!!data.maintenance)
+      alert(data.message || 'Maintenance mode updated')
+    } catch(e) {
+      alert('Failed to toggle maintenance: ' + e.message)
+    }
   }
 
   if (loading) return React.createElement('div', { style: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f1117', color: '#8b92a5' } }, 'Loading admin dashboard...')
@@ -424,6 +455,20 @@ export default function AdminDashboard() {
 
       // HEALTH TAB
       tab === 'health' && React.createElement('div', null,
+        React.createElement('div', { style: { background: '#181b24', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '12px', padding: '24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' } },
+          React.createElement('div', null,
+            React.createElement('h3', { style: { fontSize: '16px', fontWeight: 700, marginBottom: '6px' } }, 'Maintenance Mode'),
+            React.createElement('p', { style: { fontSize: '13px', color: maintenance ? '#f59e0b' : '#8b92a5' } }, maintenance === null ? 'Checking status...' : maintenance ? 'ACTIVE \u2014 website is paused and all users have been logged out.' : 'Inactive \u2014 website is running normally.')
+          ),
+          React.createElement('button', {
+            onClick: toggleMaintenance,
+            style: {
+              padding: '12px 24px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none',
+              background: maintenance ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #f59e0b, #ef4444)',
+              color: maintenance ? '#22c55e' : '#fff'
+            }
+          }, maintenance === null ? '...' : maintenance ? 'Disable Maintenance' : 'Enable Maintenance')
+        ),
         health && React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' } },
           healthCard('Screenshot Server', health.screenshot_server, health.screenshot_server === 'online'),
           healthCard('Cloudflare Worker', health.worker, true),

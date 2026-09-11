@@ -14,6 +14,7 @@ import Billing from './pages/Billing'
 import Docs from './pages/Docs'
 import FAQ from './pages/FAQ'
 import Feedback from './pages/Feedback'
+import MaintenanceGate from './components/MaintenanceGate'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
 import AdminLogin from './pages/AdminLogin'
@@ -24,6 +25,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
     <AuthProvider>
+      <MaintenanceGate>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -43,6 +45,7 @@ root.render(
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
+      </MaintenanceGate>
     </AuthProvider>
   </React.StrictMode>
 )

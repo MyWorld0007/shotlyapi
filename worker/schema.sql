@@ -3,6 +3,7 @@
 -- NOTE: the DROP statements below WIPE existing data. To migrate an existing DB
 -- incrementally, run only the missing CREATE TABLE / ALTER statements instead.
 
+DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS feedback;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS page_views;
@@ -72,6 +73,12 @@ CREATE TABLE page_views (
 CREATE INDEX idx_page_views_created_at ON page_views(created_at);
 CREATE INDEX idx_page_views_session_id ON page_views(session_id);
 CREATE INDEX idx_page_views_page       ON page_views(page);
+
+-- Key-value settings (maintenance mode flag, etc). Auto-created by the worker.
+CREATE TABLE settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT
+);
 
 -- User feedback submitted from the /feedback page.
 -- The worker also runs CREATE TABLE IF NOT EXISTS for this table, so it

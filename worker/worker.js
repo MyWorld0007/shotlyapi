@@ -715,6 +715,19 @@ export default {
       var admin = await requireAdmin(request, env)
       if (!admin) return jsonError(403, 'Admin access required')
       try {
+                // Auto-heal: add any missing columns to the users table
+        var ucols = await env.DB.prepare('PRAGMA table_info(users)').all()
+        var ucolNames = (ucols.results || []).map(function(c) { return c.name })
+        var uMissing = {
+          api_key_hash: 'TEXT', api_key_display: 'TEXT', trial_started_at: 'TEXT',
+          plan_expires_at: 'TEXT', subscription_id: 'TEXT', is_suspended: 'INTEGER DEFAULT 0',
+          reset_token: 'TEXT', reset_token_expires: 'TEXT'
+        }
+        for (var uc in uMissing) {
+          if (ucolNames.indexOf(uc) < 0) {
+            await env.DB.prepare('ALTER TABLE users ADD COLUMN ' + uc + ' ' + uMissing[uc]).run()
+          }
+        }
         var planFilter = url.searchParams.get('plan') || ''
         var search = url.searchParams.get('search') || ''
         var page = parseInt(url.searchParams.get('page') || '1')

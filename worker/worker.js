@@ -265,6 +265,24 @@ function buildOracleUrl(env, params) {
   return baseUrl + '?' + q.toString()
 }
 
+// ====== SETTINGS / MAINTENANCE ======
+async function getSetting(env, key) {
+  try {
+    var row = await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first()
+    return row ? row.value : null
+  } catch (e) {
+    try {
+      await env.DB.prepare('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)').run()
+    } catch (e2) {}
+    return null
+  }
+}
+
+async function setSetting(env, key, value) {
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)').run()
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(key, value).run()
+}
+
 export default {
   async fetch(request, env, ctx) {
     var url = new URL(request.url)
@@ -272,6 +290,20 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
     if (path === '/health') return jsonResponse({ status: 'ok', timestamp: new Date().toISOString() })
     if (path === '/' || path === '/api') return jsonResponse({ name: 'ShotlyAPI', version: '4.1', docs: 'https://shotlyapi.in/docs' })
+
+    // MAINTENANCE MODE: pause everything except health, status, and admin.
+    // The 503 also clears the shotly_token cookie - logging every user out.
+    if (path !== '/health' && path.indexOf('/api/admin') !== 0 && path !== '/api/maintenance') {
+      if ((await getSetting(env, 'maintenance')) === 'on') {
+        return jsonResponse({ error: 'ShotlyAPI is under scheduled maintenance. Please check back shortly.', maintenance: true }, 503, { 'Set-Cookie': clearAuthCookie() })
+      }
+    }
+
+    // PUBLIC: MAINTENANCE STATUS
+    if (path === '/api/maintenance' && request.method === 'GET') {
+      var mStatus = (await getSetting(env, 'maintenance')) === 'on'
+      return jsonResponse({ maintenance: mStatus })
+    }
 
     // AUTH: SIGNUP
     if (path === '/api/auth/signup' && request.method === 'POST') {
@@ -899,6 +931,20 @@ export default {
         })
       } catch(e) {
         return jsonError(500, 'Health check failed: ' + (e.message || String(e)))
+      }
+    }
+
+    // ADMIN: MAINTENANCE MODE TOGGLE
+    if (path === '/api/admin/maintenance' && request.method === 'POST') {
+      var mmAdmin = await requireAdmin(request, env)
+      if (!mmAdmin) return jsonError(403, 'Admin access required')
+      try {
+        var mmBody = await request.json()
+        await setSetting(env, 'maintenance', mmBody.enabled ? 'on' : 'off')
+        var mmOn = (await getSetting(env, 'maintenance')) === 'on'
+        return jsonResponse({ maintenance: mmOn, message: mmOn ? 'Maintenance mode ENABLED. All users are being logged out and non-admin API calls are paused.' : 'Maintenance mode DISABLED. Website is back online.' })
+      } catch (e) {
+        return jsonError(500, 'Failed to toggle maintenance: ' + (e.message || String(e)))
       }
     }
 

@@ -19,6 +19,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import PageTracker from './lib/tracker'
 import { AuthProvider } from './lib/auth'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
@@ -27,6 +28,7 @@ root.render(
     <AuthProvider>
       <MaintenanceGate>
       <BrowserRouter>
+        <PageTracker />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/playground" element={<Playground />} />

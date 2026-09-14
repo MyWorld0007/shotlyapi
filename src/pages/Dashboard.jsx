@@ -121,7 +121,7 @@ export default function Dashboard() {
                 }}>
                   <h3 style={{ marginBottom: '8px', fontSize: '20px' }}>No Active Plan</h3>
                   <p style={{ color: 'var(--text-mute)', marginBottom: '16px' }}>
-                    You need an active plan to take screenshots. Get started with a Trial for Rs.99 or choose a monthly plan.
+                    You need an active plan to take screenshots. New accounts get 20 free screenshots - or start with a Trial for Rs.99.
                   </p>
                   <Link to="/billing" className="btn btn-primary">Buy a Plan</Link>
                 </div>

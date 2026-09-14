@@ -57,7 +57,7 @@ export default function Signup() {
           ShotlyAPI
         </Link>
         <h2>Create your account</h2>
-        <p>Get an API key and start capturing screenshots.</p>
+        <p>Get an API key with 20 free screenshots. No credit card required.</p>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">

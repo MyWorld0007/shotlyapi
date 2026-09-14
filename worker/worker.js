@@ -559,6 +559,28 @@ export default {
           if (user2) {
             var expiresAt2 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             await env.DB.prepare('UPDATE users SET plan_expires_at = ? WHERE id = ?').bind(expiresAt2, user2.id).run()
+            var subAmt = body.payload.subscription.entity.amount || 0
+            ctx.waitUntil(env.DB.prepare('INSERT INTO payments (id, user_id, amount, plan, status, razorpay_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(generateId(), user2.id, subAmt, user2.plan, 'captured', subId2, new Date().toISOString()).run())
+          }
+        }
+      }
+      if (event === 'payment.captured') {
+        var payEntity = (body.payload && body.payload.payment && body.payload.payment.entity) ? body.payload.payment.entity : null
+        if (payEntity && payEntity.amount) {
+          var payEmail = payEntity.notes && payEntity.notes.email ? payEntity.notes.email : null
+          var payUser = payEmail ? await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(payEmail).first() : null
+          if (payUser) {
+            ctx.waitUntil(env.DB.prepare('INSERT INTO payments (id, user_id, amount, plan, status, razorpay_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(generateId(), payUser.id, payEntity.amount, 'trial', 'captured', payEntity.id, new Date().toISOString()).run())
+          }
+        }
+      }
+      if (event === 'payment.failed') {
+        var failEntity = (body.payload && body.payload.payment && body.payload.payment.entity) ? body.payload.payment.entity : null
+        if (failEntity) {
+          var failEmail = failEntity.notes && failEntity.notes.email ? failEntity.notes.email : null
+          var failUser = failEmail ? await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(failEmail).first() : null
+          if (failUser) {
+            ctx.waitUntil(env.DB.prepare('INSERT INTO payments (id, user_id, amount, plan, status, razorpay_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(generateId(), failUser.id, failEntity.amount || 0, 'trial', 'failed', failEntity.id, new Date().toISOString()).run())
           }
         }
       }

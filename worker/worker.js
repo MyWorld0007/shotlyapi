@@ -836,3 +836,206 @@ export default {
         var user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first()
         if (!user) return jsonError(404, 'User not found')
         var currentExpiry = user
+        .plan_expires_at ? new Date(user.plan_expires_at) : new Date()
+        if (currentExpiry < new Date()) currentExpiry = new Date()
+        currentExpiry.setDate(currentExpiry.getDate() + days)
+        await env.DB.prepare('UPDATE users SET plan_expires_at = ? WHERE id = ?').bind(currentExpiry.toISOString(), userId).run()
+        return jsonResponse({ success: true, new_expiry: currentExpiry.toISOString() })
+      } catch(e) {
+        return jsonError(500, 'Extend trial failed: ' + (e.message || String(e)))
+      }
+    }
+
+// ADMIN: SALES
+    if (path === '/api/admin/sales' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var dailyRevenue = await env.DB.prepare("SELECT DATE(created_at) as date, SUM(amount) as revenue, COUNT(*) as count FROM payments WHERE status = 'captured' GROUP BY DATE(created_at) ORDER BY date DESC LIMIT 30").all()
+        var planRevenue = await env.DB.prepare("SELECT plan, SUM(amount) as revenue, COUNT(*) as count FROM payments WHERE status = 'captured' GROUP BY plan").all()
+        var trialCount = await env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE plan = 'trial' OR trial_started_at IS NOT NULL").first()
+        var paidCount = await env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE plan IN ('starter','growth','pro')").first()
+        var conversionRate = trialCount.count > 0 ? Math.round((paidCount.count / trialCount.count) * 100) : 0
+        return jsonResponse({
+          daily: dailyRevenue.results || [],
+          by_plan: planRevenue.results || [],
+          trial_count: trialCount.count,
+          paid_count: paidCount.count,
+          conversion_rate: conversionRate
+        })
+      } catch(e) {
+        return jsonError(500, 'Sales query failed: ' + (e.message || String(e)))
+      }
+    }
+
+// ADMIN: FAILED PAYMENTS
+    if (path === '/api/admin/sales/failed' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var failed = await env.DB.prepare("SELECT p.*, u.email FROM payments p LEFT JOIN users u ON p.user_id = u.id WHERE p.status = 'failed' ORDER BY p.created_at DESC LIMIT 100").all()
+        return jsonResponse({ failed_payments: failed.results || [] })
+      } catch(e) {
+        return jsonError(500, 'Failed payments query failed: ' + (e.message || String(e)))
+      }
+    }
+
+// ADMIN: TRAFFIC
+    if (path === '/api/admin/traffic' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var dailyViews = await env.DB.prepare("SELECT DATE(created_at) as date, COUNT(*) as views, COUNT(DISTINCT session_id) as visitors FROM page_views GROUP BY DATE(created_at) ORDER BY date DESC LIMIT 30").all()
+        var topReferrers = await env.DB.prepare("SELECT referrer, COUNT(*) as count FROM page_views WHERE referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 10").all()
+        var deviceBreakdown = await env.DB.prepare("SELECT device, COUNT(*) as count FROM page_views GROUP BY device").all()
+        var bounceSessions = await env.DB.prepare("SELECT COUNT(*) as count FROM (SELECT session_id, COUNT(*) as c FROM page_views GROUP BY session_id HAVING c = 1)").first()
+        var totalSessions = await env.DB.prepare("SELECT COUNT(DISTINCT session_id) as count FROM page_views").first()
+        var bounceRate = totalSessions.count > 0 ? Math.round((bounceSessions.count / totalSessions.count) * 100) : 0
+        return jsonResponse({
+          daily: dailyViews.results || [],
+          referrers: topReferrers.results || [],
+          devices: deviceBreakdown.results || [],
+          bounce_rate: bounceRate,
+          total_sessions: totalSessions.count
+        })
+      } catch(e) {
+        return jsonError(500, 'Traffic query failed: ' + (e.message || String(e)))
+      }
+    }
+
+// ADMIN: PAGE-WISE TRAFFIC
+    if (path === '/api/admin/traffic/pages' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var pageStats = await env.DB.prepare("SELECT page, COUNT(*) as views, COUNT(DISTINCT session_id) as unique_visitors FROM page_views GROUP BY page ORDER BY views DESC LIMIT 50").all()
+        return jsonResponse({ pages: pageStats.results || [] })
+      } catch(e) {
+        return jsonError(500, 'Page traffic query failed: ' + (e.message || String(e)))
+      }
+    }
+
+// ADMIN: PLANS
+    if (path === '/api/admin/plans' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var plans = []
+        for (var key in PLANS) {
+          var planData = PLANS[key]
+          var subscriberCount = await env.DB.prepare("SELECT COUNT(*) as count FROM users WHERE plan = ?").bind(key).first()
+          plans.push({ key: key, name: planData.name, price: planData.price, limit: planData.limit, type: planData.type, subscribers: subscriberCount.count, active: planData.active !== false })
+        }
+        return jsonResponse({ plans: plans })
+      } catch(e) {
+        return jsonError(500, 'Plans query failed: ' + (e.message || String(e)))
+      }
+    }
+
+// ADMIN: HEALTH
+    if (path === '/api/admin/health' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var dbSize = await env.DB.prepare("SELECT COUNT(*) as users FROM users").first()
+        var usageCount = await env.DB.prepare("SELECT COUNT(*) as count FROM usage").first()
+        var viewsCount = await env.DB.prepare("SELECT COUNT(*) as count FROM page_views").first()
+        var paymentsCount = await env.DB.prepare("SELECT COUNT(*) as count FROM payments").first()
+        var serverStatus = 'unknown'
+        try {
+          var healthResp = await fetch(env.ORACLE_SERVER_URL + '/health', { headers: { 'X-Server-Secret': env.SERVER_SECRET }, signal: AbortSignal.timeout(5000) })
+          serverStatus = healthResp.ok ? 'online' : 'degraded'
+        } catch(e2) { serverStatus = 'offline' }
+        return jsonResponse({
+          database: { users: dbSize.users, usage_records: usageCount.count, page_views: viewsCount.count, payments: paymentsCount.count },
+          screenshot_server: serverStatus,
+          worker: 'online',
+          timestamp: new Date().toISOString()
+        })
+      } catch(e) {
+        return jsonError(500, 'Health check failed: ' + (e.message || String(e)))
+      }
+    }
+
+    // ADMIN: MAINTENANCE MODE TOGGLE
+    if (path === '/api/admin/maintenance' && request.method === 'POST') {
+      var mmAdmin = await requireAdmin(request, env)
+      if (!mmAdmin) return jsonError(403, 'Admin access required')
+      try {
+        var mmBody = await request.json()
+        await setSetting(env, 'maintenance', mmBody.enabled ? 'on' : 'off')
+        var mmOn = (await getSetting(env, 'maintenance')) === 'on'
+        return jsonResponse({ maintenance: mmOn, message: mmOn ? 'Maintenance mode ENABLED. All users are being logged out and non-admin API calls are paused.' : 'Maintenance mode DISABLED. Website is back online.' })
+      } catch (e) {
+        return jsonError(500, 'Failed to toggle maintenance: ' + (e.message || String(e)))
+      }
+    }
+
+// ============ END ADMIN SECTION ============
+    // PUBLIC: FEEDBACK SUBMISSION
+    if (path === '/api/feedback' && request.method === 'POST') {
+      try {
+        await env.DB.prepare(
+          "CREATE TABLE IF NOT EXISTS feedback (id TEXT PRIMARY KEY, user_id TEXT, email TEXT DEFAULT '', rating INTEGER NOT NULL, category TEXT DEFAULT 'other', message TEXT NOT NULL, ip TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')))"
+        ).run()
+
+        var fbIP = getClientIP(request)
+        var fbRecent = await env.DB.prepare(
+          "SELECT COUNT(*) as count FROM feedback WHERE ip = ? AND created_at >= datetime('now', '-15 minutes')"
+        ).bind(fbIP).first()
+        if (fbRecent && fbRecent.count >= 5) return jsonError(429, 'Too many submissions. Please try again later.')
+
+        var fbBody = await request.json()
+        var fbRating = parseInt(fbBody.rating, 10)
+        if (!fbRating || fbRating < 1 || fbRating > 5) return jsonError(400, 'Rating is required (1-5)')
+        var fbMessage = String(fbBody.message || '').trim()
+        if (!fbMessage) return jsonError(400, 'Message is required')
+        if (fbMessage.length > 2000) return jsonError(400, 'Message too long (max 2000 characters)')
+        var fbCategory = ['bug', 'feature', 'general', 'pricing', 'docs', 'other'].indexOf(fbBody.category) >= 0 ? fbBody.category : 'other'
+
+        var fbEmail = ''
+        var fbUserId = null
+        try {
+          var fbToken = getTokenFromRequest(request)
+          if (fbToken) {
+            var fbDecoded = await verifyJWT(fbToken, env.JWT_SECRET)
+            if (fbDecoded) {
+              fbUserId = fbDecoded.uid
+              var fbUser = await env.DB.prepare('SELECT email FROM users WHERE id = ?').bind(fbDecoded.uid).first()
+              if (fbUser) fbEmail = fbUser.email
+            }
+          }
+        } catch (e3) {}
+        if (!fbEmail && fbBody.email) fbEmail = String(fbBody.email).trim().slice(0, 200)
+
+        await env.DB.prepare(
+          'INSERT INTO feedback (id, user_id, email, rating, category, message, ip) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).bind(generateId(), fbUserId, fbEmail, fbRating, fbCategory, fbMessage, fbIP).run()
+
+        return jsonResponse({ success: true })
+      } catch (e) {
+        return jsonError(500, 'Failed to submit feedback. Please try again.')
+      }
+    }
+
+    // ADMIN: LIST FEEDBACK
+    if (path === '/api/admin/feedback' && request.method === 'GET') {
+      var admin = await requireAdmin(request, env)
+      if (!admin) return jsonError(403, 'Admin access required')
+      try {
+        var fbList = await env.DB.prepare(
+          'SELECT f.id, f.rating, f.category, f.message, f.created_at, COALESCE(f.email, u.email) as email FROM feedback f LEFT JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC LIMIT 100'
+        ).all()
+        var fbStats = await env.DB.prepare('SELECT COUNT(*) as total, ROUND(AVG(rating), 2) as avg_rating FROM feedback').first()
+        return jsonResponse({
+          feedback: fbList.results || [],
+          stats: { total: fbStats ? fbStats.total : 0, avg_rating: fbStats ? fbStats.avg_rating : 0 }
+        })
+      } catch (e) {
+        return jsonError(500, 'Failed to load feedback')
+      }
+    }
+
+    return jsonError(404, 'Not found. Check docs at https://shotlyapi.in/docs')
+  },
+}
